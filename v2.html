@@ -658,11 +658,10 @@ function runSearch(){
   var closedCount=searchResults.reduce(function(s,r){return s+r.data.closed;},0);
   var totalCount=activeCount+closedCount;
 
-  // Pricing — true per-project rate
-  var rateObj = getRate(target);
-  var rate = rateObj.rate;
+  // Pricing — smooth per-project rate based on target count
+  var rate = getRate(target);
   var totalPrice = rate * target;
-  var baseRate = RATES[0].rate; // highest rate (1–5 projects)
+  var baseRate = getRate(1);
   var savingsPerProject = baseRate - rate;
   var totalSavings = savingsPerProject * target;
 
@@ -670,21 +669,21 @@ function runSearch(){
   document.getElementById('heroRadius').textContent=foundRadius;
   document.getElementById('heroSub').textContent='from ZIP '+zip;
   document.getElementById('heroPrice').textContent=fmt(totalPrice);
-  document.getElementById('heroPriceTier').textContent=fmt(rate)+' per project';
-  document.getElementById('heroCPP').textContent=target+' projects × '+fmt(rate);
+  document.getElementById('heroPriceTier').textContent=fmtRate(rate)+' per project';
+  document.getElementById('heroCPP').textContent=target+' projects × '+fmtRate(rate);
   document.getElementById('heroActive').textContent=activeCount;
   document.getElementById('heroTarget').textContent='target: '+target+' active';
 
   // Pricing card
   document.getElementById('pricingHeaderSub').textContent='Pricing for '+target+' active projects from ZIP '+zip;
   document.getElementById('pricingTotal').textContent=fmt(totalPrice);
-  document.getElementById('pricingTotalSub').textContent=target+' projects × '+fmt(rate)+'/project';
+  document.getElementById('pricingTotalSub').textContent=target+' projects × '+fmtRate(rate)+'/project';
   document.getElementById('pricingRequested').textContent=target;
-  document.getElementById('pricingCPP').textContent=fmt(rate);
+  document.getElementById('pricingCPP').textContent=fmtRate(rate);
   document.getElementById('pricingSavings').textContent=totalSavings>0?fmt(totalSavings):'—';
   document.getElementById('savingsProjects').textContent=target;
-  document.getElementById('savingsAmount').textContent=fmt(rate);
-  document.getElementById('savingsVsBase').textContent=savingsPerProject>0?fmt(savingsPerProject):'at base rate';
+  document.getElementById('savingsAmount').textContent=fmtRate(rate);
+  document.getElementById('savingsVsBase').textContent=savingsPerProject>0?fmt(savingsPerProject)+'/project':'at base rate';
 
   // Tier rows
   var rows='';
