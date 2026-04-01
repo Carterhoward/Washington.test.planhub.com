@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlanHub Washington — Radius Finder V2</title>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.3.0/mapbox-gl.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f3;color:#1a1a1a;min-height:100vh}
+.header{background:#1a2332;padding:16px 32px;display:flex;align-items:center;gap:14px}
+.header-divider{width:1px;height:32px;background:rgba(255,255,255,0.2)}
+.header-title{font-size:15px;font-weight:600;color:#fff}
+.header-sub{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px}
+.header-pill{margin-left:auto;font-size:11px;background:rgba(46,125,50,0.3);color:#81c784;padding:4px 12px;border-radius:20px;font-weight:500;border:1px solid rgba(46,125,50,0.4)}
+.main{max-width:1100px;margin:0 auto;padding:28px 20px}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:14px;padding:22px 24px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.card-title{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.08em;margin-bottom:16px}
+.section-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr auto;gap:14px;align-items:end}
+label{display:block;font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+input[type=text],input[type=number]{width:100%;padding:11px 14px;border:1.5px solid #e5e5e5;border-radius:10px;font-size:14px;color:#1a1a1a;outline:none;background:#fff;transition:border-color .2s}
+input:focus{border-color:#1a2332}
+.btn{padding:11px 28px;background:#1a2332;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s}
+.btn:hover{background:#2d3f55}
+.btn:disabled{background:#bbb;cursor:default}
+.btn-sm{padding:6px 14px;font-size:12px;font-weight:500;background:#fff;color:#555;border:1.5px solid #e5e5e5;border-radius:8px;cursor:pointer}
+.btn-sm:hover{background:#f5f5f3}
+.data-info{display:flex;align-items:center;gap:8px;background:#f0f7f0;border:1px solid #c8e6c9;border-radius:8px;padding:10px 14px;font-size:13px;color:#2e7d32;margin-bottom:18px;font-weight:500}
+.error{color:#c0392b;font-size:13px;margin-top:8px}
+.hidden{display:none}
+.result-hero{background:linear-gradient(135deg,#1a2332 0%,#2d3f55 100%);border-radius:14px;padding:32px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;align-items:center}
+.hero-item{text-align:center}
+.hero-item.main-item{border-left:1px solid rgba(255,255,255,0.15);border-right:1px solid rgba(255,255,255,0.15);padding:0 24px}
+.hero-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.hero-value{font-size:48px;font-weight:800;color:#fff;line-height:1;letter-spacing:-1px}
+.hero-unit{font-size:14px;font-weight:500;color:rgba(255,255,255,0.6);margin-top:4px}
+.hero-sub{font-size:12px;color:rgba(255,255,255,0.5);margin-top:6px}
+.pricing-card{background:#fff;border:2px solid #1a2332;border-radius:14px;padding:24px;margin-bottom:16px;box-shadow:0 4px 16px rgba(26,35,50,.1)}
+.pricing-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #f0f0f0}
+.pricing-total-label{font-size:11px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em}
+.pricing-total-value{font-size:36px;font-weight:800;color:#1a2332;letter-spacing:-1px;line-height:1.1}
+.pricing-total-sub{font-size:12px;color:#888;margin-top:2px}
+.pricing-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.pricing-item{background:#f8f9fb;border-radius:10px;padding:14px 16px;border:1px solid #eee}
+.pricing-item.highlight{background:#f0f4ff;border-color:#c5d0e8}
+.pricing-item-label{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.pricing-item-value{font-size:22px;font-weight:700;color:#1a2332}
+.pricing-item-sub{font-size:11px;color:#888;margin-top:3px}
+.savings-banner{background:#f0f7f0;border:1px solid #c8e6c9;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px}
+.savings-icon{width:32px;height:32px;background:#2e7d32;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.savings-text{font-size:13px;color:#1b5e20;font-weight:500}
+.savings-amount{font-size:18px;font-weight:800;color:#2e7d32}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.stat-lbl{font-size:10px;color:#999;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.stat-val{font-size:26px;font-weight:700;letter-spacing:-0.5px}
+.stat-sub{font-size:11px;color:#aaa;margin-top:3px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.active-box{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:20px 24px;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.box-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.big{font-size:44px;font-weight:800;line-height:1;letter-spacing:-1px;margin-bottom:6px}
+.sub{font-size:12px;color:#888}
+.bar{height:4px;border-radius:2px;margin-top:14px}
+#map{height:450px;border-radius:10px;border:1px solid #e8e8e8}
+.bar-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.bar-label{font-size:12px;color:#555;width:175px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;background:#1a2332;border-radius:3px}
+.bar-count{font-size:12px;font-weight:700;color:#333;min-width:28px;text-align:right}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font-size:10px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:.06em;padding:8px 12px;border-bottom:1px solid #eee;text-align:left;background:#fafafa}
+.tbl td{padding:8px 12px;border-bottom:1px solid #f5f5f5;color:#333}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#fafafa}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;background:#e8f5e9;color:#1b5e20}
+.scroll{max-height:300px;overflow-y:auto}
+@media(max-width:680px){
+  .form-row{grid-template-columns:1fr 1fr}
+  .form-row .btn{grid-column:1/-1}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .two-col{grid-template-columns:1fr}
+  .result-hero{grid-template-columns:1fr}
+  .hero-item.main-item{border:none;padding:0}
+  .pricing-breakdown{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="https://www.planhub.com/wp-content/uploads/2022/08/PlanHub-Logo.png" alt="PlanHub" style="height:34px;filter:brightness(0) invert(1);object-fit:contain;">
+  <div class="header-divider"></div>
+  <div>
+    <div class="header-title">Washington Pricing Tool</div>
+    <div class="header-sub">Radius Finder &amp; Project Pricing — V2</div>
+  </div>
+  <span class="header-pill">Washington State</span>
+</div>
+
+<div class="main">
+  <div class="card">
+    <div class="card-title">Find Your Radius &amp; Pricing</div>
+    <div class="data-info">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#2e7d32" stroke-width="1.3"/><path d="M4.5 7l2 2 3-3" stroke="#2e7d32" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Data loaded: <strong id="loadedSummary">—</strong>
+    </div>
+    <div class="form-row">
+      <div><label>Center ZIP Code</label><input type="text" id="zipInput" placeholder="e.g. 98101" maxlength="5"></div>
+      <div><label>Active Projects Needed</label><input type="number" id="targetInput" placeholder="e.g. 25" min="1"></div>
+      <button class="btn" id="searchBtn" onclick="runSearch()">Calculate ›</button>
+    </div>
+    <div id="searchError" class="error hidden"></div>
+  </div>
+
+  <div id="resultsSection" class="hidden">
+    <div class="result-hero">
+      <div class="hero-item">
+        <div class="hero-label">Recommended Radius</div>
+        <div class="hero-value" id="heroRadius">—</div>
+        <div class="hero-unit">miles</div>
+        <div class="hero-sub" id="heroSub"></div>
+      </div>
+      <div class="hero-item main-item">
+        <div class="hero-label">Quoted Price</div>
+        <div class="hero-value" id="heroPrice">—</div>
+        <div class="hero-unit" id="heroPriceSub"></div>
+        <div class="hero-sub" id="heroCPP"></div>
+      </div>
+      <div class="hero-item">
+        <div class="hero-label">Active Projects Found</div>
+        <div class="hero-value" id="heroActive">—</div>
+        <div class="hero-unit">projects</div>
+        <div class="hero-sub" id="heroTarget"></div>
+      </div>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-header">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:#1a2332;margin-bottom:4px">Project Pricing Summary</div>
+          <div style="font-size:13px;color:#888" id="pricingHeaderSub"></div>
+        </div>
+        <div style="text-align:right">
+          <div class="pricing-total-label">Total Investment</div>
+          <div class="pricing-total-value" id="pricingTotal">—</div>
+          <div class="pricing-total-sub" id="pricingTotalSub"></div>
+        </div>
+      </div>
+      <div class="pricing-breakdown">
+        <div class="pricing-item highlight">
+          <div class="pricing-item-label">Projects Requested</div>
+          <div class="pricing-item-value" id="pricingRequested">—</div>
+          <div class="pricing-item-sub">active projects</div>
+        </div>
+        <div class="pricing-item highlight">
+          <div class="pricing-item-label">Rate Per Project</div>
+          <div class="pricing-item-value" id="pricingCPP">—</div>
+          <div class="pricing-item-sub">at this volume</div>
+        </div>
+        <div class="pricing-item highlight">
+          <div class="pricing-item-label">You Save vs. 1 Project</div>
+          <div class="pricing-item-value" id="pricingSavings" style="color:#2e7d32">—</div>
+          <div class="pricing-item-sub">volume discount applied</div>
+        </div>
+      </div>
+      <div class="savings-banner">
+        <div class="savings-icon">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2l1.8 3.6 4 .6-2.9 2.8.7 4L8 11l-3.6 1.9.7-4L2.2 6.2l4-.6L8 2z" fill="#fff"/></svg>
+        </div>
+        <div class="savings-text">At <strong id="savingsProjects">—</strong> projects your rate is <span class="savings-amount" id="savingsAmount">—</span>/project — <span id="savingsVsBase">—</span> less per project than the single-project rate.</div>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-lbl">Active Projects</div><div class="stat-val" id="statActive" style="color:#2e7d32">—</div><div class="stat-sub">within radius</div></div>
+      <div class="stat"><div class="stat-lbl">Past Bid Date</div><div class="stat-val" id="statClosed" style="color:#c0392b">—</div><div class="stat-sub">within radius</div></div>
+      <div class="stat"><div class="stat-lbl">ZIP Codes</div><div class="stat-val" id="statZips">—</div><div class="stat-sub">with projects</div></div>
+      <div class="stat"><div class="stat-lbl">Total Projects</div><div class="stat-val" id="statTotal">—</div><div class="stat-sub" id="statRadiusSub"></div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="active-box">
+        <div class="box-label" style="color:#2e7d32">Active Projects</div>
+        <div class="big" style="color:#2e7d32" id="activeCount">—</div>
+        <div class="sub">Bid due date is today or in the future</div>
+        <div class="bar" style="background:#2e7d32"></div>
+      </div>
+      <div class="active-box">
+        <div class="box-label" style="color:#c0392b">Past Bid Date</div>
+        <div class="big" style="color:#c0392b" id="closedCount">—</div>
+        <div class="sub">Bid due date has already passed</div>
+        <div class="bar" style="background:#c0392b"></div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:16px 20px 0">
+        <div class="section-hdr">
+          <div class="card-title" style="margin:0">Map View</div>
+          <div style="font-size:11px;color:#aaa" id="mapSubtitle"></div>
+        </div>
+      </div>
+      <div style="padding:0 16px 16px"><div id="map"></div></div>
+    </div>
+
+    <div class="two-col" style="margin-bottom:16px">
+      <div class="card" style="margin:0">
+        <div class="section-hdr"><div class="card-title" style="margin:0">By Building Use</div><span id="buildingTotal" style="font-size:11px;color:#aaa"></span></div>
+        <div id="buildingBars"></div>
+      </div>
+      <div class="card" style="margin:0">
+        <div class="section-hdr"><div class="card-title" style="margin:0">By Project Type</div><span id="projTypeTotal" style="font-size:11px;color:#aaa"></span></div>
+        <div id="projTypeBars"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-hdr">
+        <div class="card-title" style="margin:0">ZIP Code Breakdown</div>
+        <button class="btn-sm" onclick="exportCSV()">Export CSV</button>
+      </div>
+      <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>ZIP</th><th>City</th><th>Distance (mi)</th><th>Active</th><th>Past Bid</th><th>Total</th></tr></thead>
+          <tbody id="zipTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+mapboxgl.accessToken='pk.eyJ1IjoiY2FydGVyaG93YXJkIiwiYSI6ImNtbmdkZGI1NDA4NTIycW9tcTgyc2NqcnUifQ.03-MZw1_t-rB783EMVsTuw';
+
+function getRate(n){
+  var minRate=25,maxRate=130,decay=80;
+  var rate=minRate+(maxRate-minRate)*Math.exp(-n/decay);
+  return Math.round(rate*100)/100;
+}
+function fmt(n){return '$'+Math.round(n).toLocaleString();}
+function fmtR(r){return '$'+r.toFixed(2);}
+
+var COORDS={"98001":[47.320,-122.284],"98002":[47.308,-122.228],"98003":[47.307,-122.328],"98004":[47.615,-122.202],"98005":[47.596,-122.173],"98006":[47.560,-122.148],"98007":[47.602,-122.138],"98008":[47.602,-122.125],"98010":[47.329,-122.010],"98011":[47.759,-122.210],"98012":[47.860,-122.210],"98019":[47.718,-121.751],"98020":[47.803,-122.375],"98021":[47.809,-122.210],"98022":[47.200,-121.986],"98023":[47.307,-122.373],"98026":[47.803,-122.326],"98027":[47.531,-122.048],"98028":[47.759,-122.243],"98029":[47.560,-122.013],"98030":[47.364,-122.172],"98031":[47.381,-122.195],"98032":[47.381,-122.228],"98033":[47.677,-122.185],"98034":[47.709,-122.210],"98036":[47.829,-122.315],"98037":[47.822,-122.285],"98038":[47.432,-122.048],"98039":[47.631,-122.243],"98040":[47.556,-122.243],"98042":[47.370,-122.148],"98045":[47.487,-121.751],"98052":[47.674,-122.125],"98053":[47.644,-122.013],"98055":[47.464,-122.195],"98056":[47.496,-122.192],"98057":[47.473,-122.217],"98058":[47.432,-122.127],"98059":[47.507,-122.148],"98065":[47.530,-121.817],"98072":[47.754,-122.148],"98074":[47.626,-122.037],"98075":[47.588,-122.037],"98092":[47.293,-122.170],"98101":[47.606,-122.332],"98102":[47.623,-122.320],"98103":[47.660,-122.343],"98104":[47.602,-122.327],"98105":[47.662,-122.300],"98106":[47.537,-122.358],"98107":[47.669,-122.384],"98108":[47.537,-122.308],"98109":[47.638,-122.347],"98112":[47.631,-122.291],"98115":[47.686,-122.285],"98116":[47.572,-122.390],"98117":[47.680,-122.370],"98118":[47.549,-122.279],"98119":[47.637,-122.368],"98121":[47.614,-122.347],"98122":[47.610,-122.305],"98125":[47.717,-122.296],"98126":[47.560,-122.370],"98133":[47.734,-122.333],"98136":[47.545,-122.383],"98144":[47.590,-122.296],"98146":[47.497,-122.357],"98155":[47.757,-122.315],"98166":[47.456,-122.346],"98168":[47.495,-122.308],"98177":[47.760,-122.370],"98178":[47.497,-122.243],"98188":[47.446,-122.285],"98195":[47.654,-122.305],"98199":[47.650,-122.400],"98201":[47.978,-122.202],"98203":[47.929,-122.243],"98204":[47.888,-122.238],"98208":[47.903,-122.202],"98221":[48.503,-122.613],"98223":[48.159,-122.125],"98225":[48.752,-122.479],"98226":[48.768,-122.502],"98229":[48.702,-122.479],"98230":[48.990,-122.717],"98233":[48.519,-122.327],"98236":[47.962,-122.418],"98240":[48.919,-122.605],"98243":[48.611,-122.830],"98245":[48.621,-122.757],"98247":[48.931,-122.437],"98248":[48.876,-122.571],"98249":[48.003,-122.555],"98250":[48.532,-123.024],"98252":[48.082,-122.030],"98255":[48.427,-122.153],"98257":[48.404,-122.476],"98258":[48.003,-122.076],"98261":[48.473,-122.883],"98262":[48.718,-122.715],"98264":[48.876,-122.437],"98266":[48.695,-122.178],"98270":[48.071,-122.176],"98271":[48.055,-122.107],"98272":[47.856,-121.966],"98273":[48.424,-122.338],"98274":[48.424,-122.260],"98275":[47.914,-122.315],"98277":[48.296,-122.657],"98282":[48.213,-122.573],"98284":[48.505,-122.228],"98290":[47.886,-122.030],"98292":[48.158,-122.264],"98296":[47.851,-122.118],"98303":[47.207,-122.535],"98305":[48.055,-124.366],"98310":[47.578,-122.623],"98311":[47.614,-122.650],"98312":[47.539,-122.638],"98321":[47.155,-122.037],"98322":[47.297,-122.081],"98331":[47.954,-124.389],"98332":[47.333,-122.578],"98337":[47.567,-122.623],"98338":[47.108,-122.267],"98356":[46.554,-122.278],"98360":[47.100,-122.014],"98362":[48.103,-123.431],"98363":[48.118,-123.431],"98370":[47.738,-122.650],"98371":[47.186,-122.293],"98372":[47.208,-122.250],"98373":[47.145,-122.312],"98374":[47.145,-122.181],"98375":[47.108,-122.312],"98383":[47.649,-122.696],"98387":[47.100,-122.433],"98391":[47.188,-122.037],"98402":[47.253,-122.444],"98404":[47.215,-122.409],"98405":[47.253,-122.433],"98406":[47.271,-122.480],"98407":[47.282,-122.512],"98409":[47.215,-122.473],"98421":[47.258,-122.409],"98424":[47.237,-122.366],"98433":[47.117,-122.555],"98439":[47.073,-122.480],"98444":[47.145,-122.444],"98446":[47.155,-122.394],"98465":[47.253,-122.480],"98466":[47.253,-122.512],"98493":[47.151,-122.555],"98498":[47.155,-122.502],"98499":[47.172,-122.487],"98501":[47.038,-122.901],"98503":[47.022,-122.764],"98520":[46.975,-123.816],"98531":[46.717,-122.954],"98532":[46.667,-122.954],"98537":[46.956,-123.762],"98550":[46.975,-123.935],"98579":[46.792,-123.024],"98586":[46.654,-123.622],"98624":[46.308,-124.042],"98642":[45.815,-122.740],"98660":[45.628,-122.657],"98661":[45.639,-122.623],"98662":[45.648,-122.502],"98664":[45.628,-122.563],"98682":[45.655,-122.473],"98683":[45.613,-122.502],"98685":[45.693,-122.657],"98801":[47.424,-120.310],"98802":[47.424,-120.287],"98812":[48.096,-119.779],"98823":[47.324,-119.546],"98837":[47.130,-119.280],"98841":[48.412,-119.523],"98845":[47.443,-119.912],"98902":[46.600,-120.505],"98926":[46.997,-120.548],"98930":[46.250,-119.912],"98942":[46.654,-120.529],"98944":[46.324,-119.912],"98948":[46.375,-120.310],"99114":[48.540,-117.902],"99119":[48.340,-117.134],"99205":[47.668,-117.440],"99218":[47.744,-117.409],"99301":[46.230,-119.100],"99335":[46.647,-119.168],"99336":[46.203,-119.168],"99352":[46.266,-119.280],"99362":[46.065,-118.343]};
+
+var RAW=[[531915,"Joint Base Lewis Mcchord","98433","Renovation/Remodel/Repair","Military","3/13/2026"],[531940,"Cosmopolis","98537","Renovation/Remodel/Repair","Education/School/University","3/18/2026"],[531996,"Bellevue","98007","Addition","Education/School/University","3/24/2026"],[532050,"Seattle","98118","Renovation/Remodel/Repair","Education/School/University","3/24/2026"],[532164,"Kahlotus","99335","Renovation/Remodel/Repair","Education/School/University","3/9/2026"],[532221,"Seattle","98122","New Construction with Site Work","Multi-Residential","3/24/2026"],[532247,"Seattle","98118","Renovation/Remodel/Repair","Education/School/University","3/24/2026"],[532251,"Renton","98056","Renovation/Remodel/Repair","Education/School/University","3/10/2026"],[532255,"Renton","98057","Renovation/Remodel/Repair","Community Center","3/12/2026"],[532391,"Vancouver","98664","Renovation/Remodel/Repair","Municipal","3/11/2026"],[532471,"Bremerton","98337","Renovation/Remodel/Repair","Education/School/University","3/23/2026"],[532582,"Tacoma","98421","Renovation/Remodel/Repair","Municipal","3/23/2026"],[532649,"Ellensburg","98926","Renovation/Remodel/Repair","Municipal","3/23/2026"],[532685,"Silverdale","98383","New Construction with Site Work","Retail Store","3/27/2026"],[532715,"Bellingham","98225","Renovation/Remodel/Repair","Municipal","3/23/2026"],[532750,"Brewster","98812","Renovation/Remodel/Repair","Education/School/University","3/11/2026"],[532752,"Vancouver","98661","Renovation/Remodel/Repair","Municipal","4/6/2026"],[532845,"Spokane","99205","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care","3/27/2026"],[532854,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University","3/25/2026"],[532864,"Bellingham","98225","Tenant Build-Out","Restaurant","3/5/2026"],[532897,"Bellingham","98225","Renovation/Remodel/Repair","Municipal","3/23/2026"],[533023,"Lakewood","98499","Renovation/Remodel/Repair","Grocery Store","3/25/2026"],[533035,"Shoreline","98155","New Construction with Site Work","Multi-Residential","3/20/2026"],[533094,"Spokane","99205","Renovation/Remodel/Repair","Other","3/27/2026"],[533095,"Bellevue","98006","Renovation/Remodel/Repair","Education/School/University","3/23/2026"],[533108,"Ellensburg","98926","Site Work Only","Municipal","3/31/2026"],[533168,"Federal Way","98003","Renovation/Remodel/Repair","Municipal","3/22/2026"],[533174,"Bellevue","98006","Renovation/Remodel/Repair","Education/School/University","3/23/2026"],[533178,"Centralia","98531","Renovation/Remodel/Repair","Municipal","3/11/2026"],[533191,"Silverdale","98383","Tenant Build-Out","Retail Store","3/27/2026"],[533313,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University","3/23/2026"],[533415,"Vancouver","98660","Renovation/Remodel/Repair","Library","4/5/2026"],[533432,"Federal Way","98003","Renovation/Remodel/Repair","Multi-Residential","3/17/2026"],[533556,"Gig Harbor","98332","Renovation/Remodel/Repair","Jail/Prison","3/23/2026"],[533614,"Lake Stevens","98258","New Construction with Site Work","Retail Store","3/17/2026"],[533638,"Lopez Island","98261","New Construction with Site Work","Park/Playground","3/25/2026"],[533671,"Palisades","98845","Renovation/Remodel/Repair","Education/School/University","3/24/2026"],[533680,"Cusick","99119","Renovation/Remodel/Repair","Education/School/University","4/1/2026"],[533864,"Silverdale","98383","Tenant Build-Out","Retail Store","3/27/2026"],[534070,"Enumclaw","98022","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care","3/25/2026"],[534076,"Fife","98424","Renovation/Remodel/Repair","Fire/Police Station","4/6/2026"],[534081,"Goldendale","98620","Renovation/Remodel/Repair","Municipal","3/23/2026"],[534121,"Omak","98841","Renovation/Remodel/Repair","Municipal","3/25/2026"],[534144,"Kirkland","98033","Renovation/Remodel/Repair","Municipal","3/18/2026"],[534175,"Vancouver","98685","Renovation/Remodel/Repair","Municipal","4/22/2026"],[534197,"Centralia","98531","Addition","Municipal","3/24/2026"],[534198,"Seattle","98118","Renovation/Remodel/Repair","Education/School/University","3/24/2026"],[534218,"Bremerton","98311","Renovation/Remodel/Repair","Municipal","4/5/2026"],[534236,"Selah","98942","Addition","Education/School/University","4/8/2026"],[534276,"Port Angeles","98363","New Construction with Site Work","Municipal","3/30/2026"],[534291,"Spokane","99218","New Construction with Site Work","Retail Store","3/25/2026"],[534303,"Vancouver","98662","Renovation/Remodel/Repair","Other","3/26/2026"],[534331,"Seattle","98115","Renovation/Remodel/Repair","Education/School/University","3/26/2026"],[534367,"Pasco","99301","Renovation/Remodel/Repair","Education/School/University","3/30/2026"],[534418,"Bellevue","98004","Renovation/Remodel/Repair","Retail Store","3/19/2026"],[534430,"Everett","98208","Renovation/Remodel/Repair","Fitness Center","3/19/2026"],[534514,"Enumclaw","98022","Renovation/Remodel/Repair","Municipal","3/30/2026"],[534535,"Federal Way","98003","Renovation/Remodel/Repair","Multi-Residential","4/21/2026"],[534548,"Tacoma","98493","Renovation/Remodel/Repair","Clinic/Hospital/Medical","4/20/2026"],[534661,"Ridgefield","98642","New Construction with Site Work","Community Center","4/1/2026"],[534679,"Vancouver","98661","Renovation/Remodel/Repair","Municipal","4/6/2026"],[534683,"Vancouver","98685","Renovation/Remodel/Repair","Municipal","3/18/2026"],[534695,"Yakima","98902","Tenant Build-Out","Retail Store","3/23/2026"],[534711,"Spokane","99218","New Construction with Site Work","Retail Store","3/25/2026"],[534722,"Ridgefield","98642","New Construction with Site Work","Community Center","3/31/2026"],[534728,"Spanaway","98387","Renovation/Remodel/Repair","Waste Water Treatment","4/3/2026"],[534850,"Bellevue","98004","Renovation/Remodel/Repair","Retail Store","3/19/2026"],[534887,"Morton","98356","Renovation/Remodel/Repair","Fire/Police Station","3/19/2026"],[534918,"Tulalip","98271","Tenant Build-Out","Retail Store","3/30/2026"],[534938,"Tacoma","98493","Renovation/Remodel/Repair","Medical","4/17/2026"],[534950,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University","3/26/2026"],[534952,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University","3/24/2026"],[535021,"Vancouver","98660","Renovation/Remodel/Repair","Municipal","4/8/2026"],[535037,"Seattle","98112","Renovation/Remodel/Repair","Multi-Residential","3/30/2026"],[535053,"Bellevue","98004","Tenant Build-Out","Retail Store","3/19/2026"],[535062,"Walla Walla","99362","Renovation/Remodel/Repair","Jail/Prison","4/6/2026"],[535078,"Seattle","98115","Renovation/Remodel/Repair","Education/School/University","3/31/2026"],[535100,"Seattle","98107","Renovation/Remodel/Repair","Retail Store","4/3/2026"],[535102,"Renton","98057","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care","3/12/2026"],[535113,"Auburn","98002","Renovation/Remodel/Repair","Theater/Auditorium","3/19/2026"],[535144,"Tacoma","98421","Renovation/Remodel/Repair","Municipal","4/6/2026"],[535160,"Tulalip","98271","Renovation/Remodel/Repair","Retail Store","3/30/2026"],[535190,"Gig Harbor","98332","Renovation/Remodel/Repair","Mixed-Use","3/24/2026"],[535276,"Olympia","98501","Renovation/Remodel/Repair","Education/School/University","3/16/2026"],[535382,"Spokane","99218","New Construction with Site Work","Retail Store","3/26/2026"],[535421,"Sunnyside","98944","Renovation/Remodel/Repair","Municipal","3/31/2026"],[535460,"Seattle","98107","Renovation/Remodel/Repair","Retail Store","4/3/2026"],[535528,"Vancouver","98662","Tenant Build-Out","Mixed-Use","3/26/2026"],[535562,"Kent","98032","Renovation/Remodel/Repair","Residential Subdivision","3/31/2026"],[535739,"Vancouver","98662","Renovation/Remodel/Repair","Mixed-Use","3/26/2026"],[535841,"Grays Harbor City","98550","New Construction with Site Work","Convenience Store/Gas Station","3/18/2026"],[535874,"Seattle","98178","Renovation/Remodel/Repair","Education/School/University","4/7/2026"],[535892,"Auburn","98092","New Construction with Site Work","Municipal","4/6/2026"],[536000,"Renton","98056","Renovation/Remodel/Repair","Education/School/University","4/6/2026"],[536058,"Bellingham","98225","Renovation/Remodel/Repair","Waste Water Treatment","4/13/2026"],[536079,"Vancouver","98682","Renovation/Remodel/Repair","Education/School/University","3/30/2026"],[536232,"Wenatchee","98801","Renovation/Remodel/Repair","Mixed-Use","3/27/2026"],[536297,"Tulalip","98271","Renovation/Remodel/Repair","Retail Store","3/18/2026"],[536438,"Bellingham","98225","Renovation/Remodel/Repair","Waste Water Treatment","4/13/2026"],[536552,"Seattle","98118","Renovation/Remodel/Repair","Education/School/University","3/24/2026"],[536562,"Toppenish","98948","Renovation/Remodel/Repair","Waste Water Treatment","4/1/2026"],[536649,"Sammamish","98074","Renovation/Remodel/Repair","Fitness Center","3/27/2026"],[536770,"Renton","98057","Tenant Build-Out","Other","4/3/2026"],[536777,"Woodinville","98072","Tenant Build-Out","Other","4/7/2026"],[536819,"Enumclaw","98022","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care","3/26/2026"],[536825,"Bellevue","98005","New Construction with Site Work","Mixed-Use","3/25/2026"],[536836,"Enumclaw","98022","Renovation/Remodel/Repair","Other","3/31/2026"],[536852,"Tacoma","98409","Renovation/Remodel/Repair","Office","3/31/2026"],[536855,"Bellingham","98226","Renovation/Remodel/Repair","Municipal","3/30/2026"],[536873,"Port Angeles","98363","New Construction with Site Work","Municipal","4/7/2026"],[536899,"Seattle","98118","Renovation/Remodel/Repair","Education/School/University","3/24/2026"],[536987,"Moses Lake","98837","Renovation/Remodel/Repair","Office","3/27/2026"],[537086,"Enumclaw","98022","Renovation/Remodel/Repair","Other","3/31/2026"],[537087,"Enumclaw","98022","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care","3/25/2026"],[537089,"Bellingham","98225","Renovation/Remodel/Repair","Municipal","3/23/2026"],[537090,"Bremerton","98337","Renovation/Remodel/Repair","Education/School/University","3/23/2026"],[537113,"Kent","98042","New Construction no Site Work","Other","3/31/2026"],[537135,"Seattle","98109","Renovation/Remodel/Repair","Fitness Center","4/3/2026"],[537141,"Enumclaw","98022","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care","3/26/2026"],[537142,"Blaine","98230","Renovation/Remodel/Repair","Municipal","3/25/2026"],[537178,"Lakewood","98498","Renovation/Remodel/Repair","Municipal","4/15/2026"],[537273,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University","3/26/2026"],[537274,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University","3/24/2026"],[537305,"Bonney Lake","98391","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care","4/1/2026"],[537338,"Seattle","98115","Renovation/Remodel/Repair","Education/School/University","3/31/2026"],[537408,"Seattle","98178","Renovation/Remodel/Repair","Education/School/University","4/7/2026"],[537450,"Poulsbo","98370","Renovation/Remodel/Repair","Municipal","3/26/2026"],[537452,"Bremerton","98337","Renovation/Remodel/Repair","Municipal","3/31/2026"],[537663,"Lynnwood","98037","Renovation/Remodel/Repair","Education/School/University","3/30/2026"],[537675,"Grandview","98930","Renovation/Remodel/Repair","Municipal","4/15/2026"],[537727,"Ridgefield","98642","New Construction with Site Work","Municipal","5/12/2026"],[537899,"Tukwila","98188","Tenant Build-Out","Retail Store","4/13/2026"],[537908,"Lakewood","98499","Tenant Build-Out","Retail Store","4/13/2026"],[537968,"Vancouver","98683","Renovation/Remodel/Repair","Medical","4/1/2026"],[537978,"Vancouver","98660","Renovation/Remodel/Repair","Fire/Police Station","4/20/2026"],[537982,"Ilwaco","98624","Renovation/Remodel/Repair","Clinic/Hospital/Medical","4/9/2026"],[537999,"Tacoma","98493","Renovation/Remodel/Repair","Other","4/17/2026"],[538019,"Vancouver","98660","Renovation/Remodel/Repair","Municipal","4/8/2026"],[538034,"Chehalis","98532","New Construction with Site Work","Hotel/Motel","4/3/2026"],[538081,"Seattle","98112","Renovation/Remodel/Repair","Multi-Residential","4/7/2026"],[538092,"Bellingham","98229","Renovation/Remodel/Repair","Municipal","3/23/2026"],[538187,"Gig Harbor","98332","Renovation/Remodel/Repair","Mixed-Use","3/24/2026"],[538193,"Sammamish","98074","Renovation/Remodel/Repair","Medical","3/27/2026"],[538207,"Vancouver","98660","Renovation/Remodel/Repair","Municipal","4/8/2026"],[538253,"Port Angeles","98363","New Construction with Site Work","Municipal","4/8/2026"],[538254,"Bellingham","98229","Renovation/Remodel/Repair","Municipal","3/23/2026"],[538283,"Kirkland","98033","Renovation/Remodel/Repair","Municipal","4/5/2026"],[538326,"Beaver","98305","Renovation/Remodel/Repair","Municipal","4/8/2026"],[538330,"Everett","98203","Renovation/Remodel/Repair","Education/School/University","4/1/2026"],[538428,"Bellingham","98229","Renovation/Remodel/Repair","Municipal","3/23/2026"],[538436,"Bellevue","98005","Renovation/Remodel/Repair","Education/School/University","4/7/2026"],[538680,"Walla Walla","99362","Renovation/Remodel/Repair","Education/School/University","4/15/2026"],[538717,"Aberdeen","98520","Renovation/Remodel/Repair","Education/School/University","4/21/2026"],[538727,"Mount Vernon","98273","Renovation/Remodel/Repair","Clinic/Hospital/Medical","4/23/2026"],[538731,"East Wenatchee","98802","New Construction with Site Work","Waste Water Treatment","4/13/2026"],[538743,"Vancouver","98685","Renovation/Remodel/Repair","Waste Water Treatment","4/15/2026"],[538790,"Spokane","99218","Renovation/Remodel/Repair","Retail Store","3/25/2026"],[538796,"Bellingham","98225","Renovation/Remodel/Repair","Education/School/University","3/26/2026"],[538950,"Bellingham","98225","Renovation/Remodel/Repair","Education/School/University","3/26/2026"],[538959,"Redmond","98052","Renovation/Remodel/Repair","Retail Store","3/26/2026"],[538982,"Forks","98331","New Construction with Site Work","Residential Subdivision","4/9/2026"],[539038,"Bellevue","98004","Renovation/Remodel/Repair","Retail Store","4/2/2026"],[539182,"Lynnwood","98036","Renovation/Remodel/Repair","Mixed-Use","3/31/2026"],[539215,"Port Angeles","98363","New Construction with Site Work","Municipal","3/30/2026"],[539231,"Kennewick","99336","Renovation/Remodel/Repair","Municipal","4/8/2026"],[539236,"Bonney Lake","98391","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care","4/2/2026"],[539247,"Seattle","98115","Renovation/Remodel/Repair","Private School","4/3/2026"],[539304,"Port Angeles","98363","New Construction with Site Work","Municipal","3/30/2026"],[539380,"Lynnwood","98037","Renovation/Remodel/Repair","Education/School/University","3/31/2026"],[539382,"Buckley","98321","New Construction with Site Work","Multi-Residential","3/26/2026"],[539434,"Newcastle","98059","Renovation/Remodel/Repair","Retail Store","4/8/2026"],[539457,"South Bend","98586","Renovation/Remodel/Repair","Education/School/University","4/14/2026"],[539461,"Rochester","98579","New Construction with Site Work","Auto Dealership","4/16/2026"],[539488,"Silverdale","98383","Renovation/Remodel/Repair","Retail Store","3/27/2026"],[539578,"Seattle","98107","Renovation/Remodel/Repair","Retail Store","4/3/2026"],[539615,"Moses Lake","98837","Renovation/Remodel/Repair","Retail Store","4/6/2026"],[539819,"Renton","98056","Renovation/Remodel/Repair","Education/School/University","4/7/2026"],[539956,"Friday Harbor","98250","Renovation/Remodel/Repair","Park/Playground","4/6/2026"],[539969,"Richland","99352","Renovation/Remodel/Repair","Retail Store","3/30/2026"],[540040,"Bellevue","98007","Renovation/Remodel/Repair","Multi-Residential","3/31/2026"],[540051,"Bellingham","98225","Renovation/Remodel/Repair","Education/School/University","3/27/2026"],[540147,"Kent","98032","Renovation/Remodel/Repair","Multi-Residential","4/7/2026"],[540164,"Sunnyside","98944","Renovation/Remodel/Repair","Retail Store","4/6/2026"],[540175,"Bellevue","98007","Renovation/Remodel/Repair","Multi-Residential","4/6/2026"],[540215,"Bellevue","98008","Renovation/Remodel/Repair","Multi-Residential","4/1/2026"],[540284,"Orting","98360","Renovation/Remodel/Repair","Residential Subdivision","4/30/2026"],[540383,"Sunnyside","98944","Tenant Build-Out","Retail Store","4/6/2026"],[540441,"Tacoma","98446","New Construction with Site Work","Restaurant","4/6/2026"],[540484,"Lacey","98503","Renovation/Remodel/Repair","Municipal","4/7/2026"],[540489,"Colville","99114","Renovation/Remodel/Repair","Retail Store","3/30/2026"],[540552,"Federal Way","98003","Renovation/Remodel/Repair","Multi-Residential","4/28/2026"],[540569,"Freeland","98249","Renovation/Remodel/Repair","Retail Store","4/14/2026"],[540590,"Arlington","98223","Renovation/Remodel/Repair","Retail Store","4/1/2026"],[540599,"Lacey","98503","Renovation/Remodel/Repair","Municipal","4/7/2026"],[540742,"Tulalip","98271","Tenant Build-Out","Retail Store","4/8/2026"],[540764,"Tumwater","98501","Renovation/Remodel/Repair","Education/School/University","4/13/2026"],[540803,"Forks","98331","Renovation/Remodel/Repair","Jail/Prison","4/22/2026"],[540906,"Mukilteo","98275","Tenant Build-Out","Fitness Center","4/10/2026"],[541157,"Ridgefield","98642","New Construction with Site Work","Municipal","5/12/2026"],[541285,"Ephrata","98823","Renovation/Remodel/Repair","Retail Store","4/13/2026"],[541614,"Seattle","98195","Renovation/Remodel/Repair","Education/School/University","4/20/2026"],[541739,"Renton","98056","Renovation/Remodel/Repair","Private School","4/7/2026"],[541765,"Kennewick","99336","New Construction with Site Work","Service Station/Car Wash","4/15/2026"],[541767,"Tulalip","98271","Tenant Build-Out","Retail Store","4/9/2026"]];
+
+var today=new Date();today.setHours(0,0,0,0);
+var allProjects=RAW.map(function(r){var bd=r[5]?new Date(r[5]):null;if(bd)bd.setHours(0,0,0,0);return{zip:String(r[2]).trim(),city:r[1],projType:r[3],useType:r[4],isActive:bd?bd>=today:false};});
+var totalActive=allProjects.filter(function(p){return p.isActive;}).length;
+
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('loadedSummary').textContent=allProjects.length+' projects · '+totalActive+' active';
+  document.getElementById('zipInput').addEventListener('keydown',function(e){if(e.key==='Enter')runSearch();});
+});
+
+function haversine(la1,lo1,la2,lo2){var R=3958.8,d=Math.PI/180;var a=Math.pow(Math.sin((la2-la1)*d/2),2)+Math.cos(la1*d)*Math.cos(la2*d)*Math.pow(Math.sin((lo2-lo1)*d/2),2);return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));}
+function showErr(id,msg){var e=document.getElementById(id);e.textContent=msg;e.classList.remove('hidden');}
+function hideErr(id){document.getElementById(id).classList.add('hidden');}
+
+var mbMap=null,searchResults=[];
+
+function runSearch(){
+  hideErr('searchError');
+  var raw=document.getElementById('zipInput').value.trim().replace(/\D/g,'');
+  var zip=raw.length===4?'0'+raw:raw;
+  var target=parseInt(document.getElementById('targetInput').value);
+  if(raw.length<4||raw.length>5){showErr('searchError','Please enter a valid 5-digit ZIP code.');return;}
+  if(!target||target<1){showErr('searchError','Please enter the number of active projects needed.');return;}
+  var center=COORDS[zip];
+  if(!center){showErr('searchError','ZIP code '+zip+' not found. Try a nearby ZIP.');return;}
+
+  var btn=document.getElementById('searchBtn');
+  btn.disabled=true;btn.textContent='Calculating…';
+
+  var zipDist={};
+  allProjects.forEach(function(p){if(!zipDist[p.zip]&&COORDS[p.zip])zipDist[p.zip]=haversine(center[0],center[1],COORDS[p.zip][0],COORDS[p.zip][1]);});
+
+  var activeByDist=allProjects.filter(function(p){return p.isActive&&COORDS[p.zip];}).map(function(p){return{p:p,dist:zipDist[p.zip]||0};}).sort(function(a,b){return a.dist-b.dist;});
+
+  var foundRadius=activeByDist.length>=target?Math.ceil(activeByDist[target-1].dist)+1:activeByDist.length>0?Math.ceil(activeByDist[activeByDist.length-1].dist)+1:10;
+
+  var zipData={};
+  allProjects.forEach(function(p){
+    if(!COORDS[p.zip])return;
+    var dist=zipDist[p.zip]||haversine(center[0],center[1],COORDS[p.zip][0],COORDS[p.zip][1]);
+    if(dist>foundRadius)return;
+    if(!zipData[p.zip])zipData[p.zip]={count:0,active:0,closed:0,city:p.city,useTypes:{},projTypes:{},coords:COORDS[p.zip],dist:Math.round(dist*10)/10};
+    zipData[p.zip].count++;
+    if(p.isActive)zipData[p.zip].active++;else zipData[p.zip].closed++;
+    if(p.useType)zipData[p.zip].useTypes[p.useType]=(zipData[p.zip].useTypes[p.useType]||0)+1;
+    if(p.projType)zipData[p.zip].projTypes[p.projType]=(zipData[p.zip].projTypes[p.projType]||0)+1;
+  });
+
+  searchResults=Object.keys(zipData).map(function(z){return{zip:z,dist:zipData[z].dist,data:zipData[z],coords:zipData[z].coords};}).sort(function(a,b){return a.dist-b.dist;});
+
+  var totalProj=searchResults.reduce(function(s,r){return s+r.data.count;},0);
+  var activeCount=searchResults.reduce(function(s,r){return s+r.data.active;},0);
+  var closedCount=searchResults.reduce(function(s,r){return s+r.data.closed;},0);
+
+  // Pricing
+  var rate=getRate(target);
+  var totalPrice=rate*target;
+  var baseRate=getRate(1);
+  var savingsPerProj=baseRate-rate;
+  var totalSavings=savingsPerProj*target;
+
+  // Hero
+  document.getElementById('heroRadius').textContent=foundRadius;
+  document.getElementById('heroSub').textContent='from ZIP '+zip;
+  document.getElementById('heroPrice').textContent=fmt(totalPrice);
+  document.getElementById('heroPriceSub').textContent=fmtR(rate)+' per project';
+  document.getElementById('heroCPP').textContent=target+' projects × '+fmtR(rate);
+  document.getElementById('heroActive').textContent=activeCount;
+  document.getElementById('heroTarget').textContent='target: '+target+' active';
+
+  // Pricing card
+  document.getElementById('pricingHeaderSub').textContent='Pricing for '+target+' active projects from ZIP '+zip;
+  document.getElementById('pricingTotal').textContent=fmt(totalPrice);
+  document.getElementById('pricingTotalSub').textContent=target+' projects × '+fmtR(rate)+'/project';
+  document.getElementById('pricingRequested').textContent=target;
+  document.getElementById('pricingCPP').textContent=fmtR(rate);
+  document.getElementById('pricingSavings').textContent=totalSavings>0?fmt(totalSavings):'—';
+  document.getElementById('savingsProjects').textContent=target;
+  document.getElementById('savingsAmount').textContent=fmtR(rate);
+  document.getElementById('savingsVsBase').textContent=savingsPerProj>0?fmtR(savingsPerProj):'at base rate';
+
+  // Stats
+  document.getElementById('statActive').textContent=activeCount.toLocaleString();
+  document.getElementById('statClosed').textContent=closedCount.toLocaleString();
+  document.getElementById('statZips').textContent=searchResults.length;
+  document.getElementById('statTotal').textContent=totalProj.toLocaleString();
+  document.getElementById('statRadiusSub').textContent='within '+foundRadius+' mi';
+  document.getElementById('activeCount').textContent=activeCount.toLocaleString();
+  document.getElementById('closedCount').textContent=closedCount.toLocaleString();
+  document.getElementById('mapSubtitle').textContent=foundRadius+'-mile radius from ZIP '+zip;
+  document.getElementById('resultsSection').classList.remove('hidden');
+
+  var useAgg={},ptAgg={};
+  searchResults.forEach(function(r){Object.keys(r.data.useTypes).forEach(function(k){useAgg[k]=(useAgg[k]||0)+r.data.useTypes[k];});Object.keys(r.data.projTypes).forEach(function(k){ptAgg[k]=(ptAgg[k]||0)+r.data.projTypes[k];});});
+  renderBars('buildingBars',useAgg,10,'buildingTotal');
+  renderBars('projTypeBars',ptAgg,10,'projTypeTotal');
+
+  var tbody=document.getElementById('zipTableBody');tbody.innerHTML='';
+  searchResults.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td><span class="badge">'+r.zip+'</span></td><td>'+r.data.city+'</td><td>'+r.dist+'</td><td style="color:#2e7d32;font-weight:600">'+r.data.active+'</td><td style="color:#c0392b;font-weight:600">'+r.data.closed+'</td><td style="font-weight:700">'+r.data.count+'</td>';tbody.appendChild(tr);});
+  if(!searchResults.length)tbody.innerHTML='<tr><td colspan="6" style="text-align:center;padding:30px;color:#bbb">No results found.</td></tr>';
+
+  if(mbMap){mbMap.remove();mbMap=null;}
+  mbMap=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/light-v11',center:[center[1],center[0]],zoom:7});
+  mbMap.on('load',function(){
+    var mx=Math.max.apply(null,searchResults.map(function(r){return r.data.active;}));if(mx<1)mx=1;
+    searchResults.forEach(function(r){var pct=r.data.active/mx;var sz=Math.max(10,Math.round(10+pct*18));var el=document.createElement('div');el.style.cssText='width:'+sz+'px;height:'+sz+'px;background:rgba(46,125,50,'+(0.55+pct*0.4).toFixed(2)+');border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.3);cursor:pointer';new mapboxgl.Marker({element:el}).setLngLat([r.coords[1],r.coords[0]]).setPopup(new mapboxgl.Popup({offset:10}).setHTML('<b>'+r.zip+'</b> · '+r.data.city+'<br>'+r.data.active+' active · '+r.data.closed+' past bid · '+r.dist+' mi')).addTo(mbMap);});
+    var cEl=document.createElement('div');cEl.style.cssText='width:14px;height:14px;background:#1a2332;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.4)';
+    new mapboxgl.Marker({element:cEl}).setLngLat([center[1],center[0]]).setPopup(new mapboxgl.Popup().setHTML('<b>Center: '+zip+'</b>')).addTo(mbMap);
+    var km=foundRadius*1.60934,dlat=km/111.32,dlng=km/(111.32*Math.cos(center[0]*Math.PI/180));
+    mbMap.fitBounds([[center[1]-dlng,center[0]-dlat],[center[1]+dlng,center[0]+dlat]],{padding:40});
+  });
+  btn.disabled=false;btn.textContent='Calculate ›';
+}
+
+function renderBars(id,agg,topN,totalId){
+  var el=document.getElementById(id);
+  var sorted=Object.keys(agg).map(function(k){return[k,agg[k]];}).sort(function(a,b){return b[1]-a[1];}).slice(0,topN);
+  var max=sorted.length?sorted[0][1]:1;
+  var grand=Object.keys(agg).reduce(function(s,k){return s+agg[k];},0);
+  document.getElementById(totalId).textContent=grand+' total';
+  if(!sorted.length){el.innerHTML='<div style="font-size:13px;color:#aaa;padding:8px 0">No data</div>';return;}
+  el.innerHTML=sorted.map(function(kv){return'<div class="bar-wrap"><div class="bar-label" title="'+kv[0]+'">'+kv[0]+'</div><div class="bar-track"><div class="bar-fill" style="width:'+Math.round(kv[1]/max*100)+'%"></div></div><div class="bar-count">'+kv[1]+'</div></div>';}).join('');
+}
+
+function exportCSV(){
+  if(!searchResults.length)return;
+  var zip=document.getElementById('zipInput').value.trim();
+  var target=document.getElementById('targetInput').value;
+  var csv='ZIP Code,City,Distance (mi),Active,Past Bid,Total\n';
+  searchResults.forEach(function(r){csv+=r.zip+',"'+r.data.city+'",'+r.dist+','+r.data.active+','+r.data.closed+','+r.data.count+'\n';});
+  var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='radius_finder_'+zip+'_'+target+'projects.csv';a.click();
+}
+</script>
+</body>
+</html>
