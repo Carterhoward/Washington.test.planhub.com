@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PlanHub Washington Pricing Test Project Availability</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f5f3;color:#1a1a1a;min-height:100vh}
+.header{background:#fff;border-bottom:1px solid #e5e5e5;padding:14px 24px;display:flex;align-items:center;gap:10px}
+.header h1{font-size:17px;font-weight:600}
+.pill{font-size:11px;background:#e8f5e9;color:#1b5e20;padding:3px 10px;border-radius:20px;font-weight:500}
+.main{max-width:1100px;margin:0 auto;padding:20px 16px}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.05em;margin-bottom:14px}
+.form-row{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}
+label{display:block;font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px}
+input[type=text],select{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#1a1a1a;outline:none;transition:border-color .2s;background:#fff}
+input[type=text]:focus,select:focus{border-color:#555}
+.btn{padding:9px 22px;background:#1a1a1a;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#333}
+.btn:disabled{background:#bbb;cursor:default}
+.btn-sm{padding:5px 14px;font-size:12px;background:#fff;color:#1a1a1a;border:1px solid #ddd;border-radius:7px;cursor:pointer}
+.btn-sm:hover{background:#f5f5f3}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.stat{background:#f5f5f3;border-radius:8px;padding:13px 15px}
+.stat-lbl{font-size:11px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.stat-val{font-size:24px;font-weight:600}
+.stat-sub{font-size:11px;color:#aaa;margin-top:2px}
+#map{height:450px;border-radius:8px;border:1px solid #e5e5e5}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{font-size:10px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.04em;padding:6px 10px;border-bottom:1px solid #e5e5e5;text-align:left}
+.tbl td{padding:6px 10px;border-bottom:1px solid #f0f0f0}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td:last-child{font-weight:600}
+.badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:500;background:#e8f5e9;color:#1b5e20}
+.bar-wrap{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.bar-label{font-size:12px;color:#444;width:170px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;height:8px;background:#f0f0f0;border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;background:#1a1a1a;border-radius:4px}
+.bar-count{font-size:12px;font-weight:600;color:#333;min-width:28px;text-align:right}
+.error{color:#c0392b;font-size:13px;margin-top:8px}
+.scroll{max-height:280px;overflow-y:auto}
+.section-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.hidden{display:none}
+.data-info{display:flex;align-items:center;gap:8px;background:#f5f5f3;border-radius:8px;padding:10px 14px;font-size:13px;color:#555;margin-bottom:14px}
+@media(max-width:640px){
+  .form-row{grid-template-columns:1fr 1fr}
+  .form-row .btn{grid-column:1/-1}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .two-col{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img src="https://www.planhub.com/wp-content/uploads/2022/08/PlanHub-Logo.png" alt="PlanHub" style="height:36px;object-fit:contain;" onerror="this.style.display='none'">
+  <div style="width:1px;height:28px;background:#e5e5e5;margin:0 4px"></div>
+  <div>
+    <div style="font-size:15px;font-weight:600;color:#1a1a1a">Washington Pricing Test</div>
+    <div style="font-size:11px;color:#888;margin-top:1px">Project Availability</div>
+  </div>
+  <span class="pill" style="margin-left:auto">Washington State</span>
+</div>
+
+<div class="main">
+  <div class="card">
+    <div class="card-title">Search by Radius</div>
+    <div class="data-info">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+        <circle cx="7" cy="7" r="6" stroke="#2e7d32" stroke-width="1.2"/>
+        <path d="M4.5 7l2 2 3-3" stroke="#2e7d32" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Data loaded: <strong id="loadedSummary">—</strong>
+    </div>
+    <div class="form-row">
+      <div>
+        <label>Center ZIP Code</label>
+        <input type="text" id="zipInput" placeholder="e.g. 98101" maxlength="5">
+      </div>
+      <div>
+        <label>Radius (miles)</label>
+        <select id="radiusInput">
+          <option value="25">25 miles</option>
+          <option value="50" selected>50 miles</option>
+          <option value="75">75 miles</option>
+          <option value="100">100 miles</option>
+          <option value="150">150 miles</option>
+          <option value="200">200 miles</option>
+        </select>
+      </div>
+      <button class="btn" id="searchBtn" onclick="runSearch()">Search</button>
+    </div>
+    <div id="searchError" class="error hidden"></div>
+  </div>
+
+  <div id="resultsSection" class="hidden">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="stat-lbl">Total Projects</div>
+        <div class="stat-val" id="statTotal">—</div>
+        <div class="stat-sub" id="statRadius"></div>
+      </div>
+      <div class="stat">
+        <div class="stat-lbl">ZIP Codes</div>
+        <div class="stat-val" id="statZips">—</div>
+        <div class="stat-sub">with projects</div>
+      </div>
+      <div class="stat">
+        <div class="stat-lbl">Avg per ZIP</div>
+        <div class="stat-val" id="statAvg">—</div>
+        <div class="stat-sub">projects</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden">
+      <div style="padding:14px 18px 0">
+        <div class="section-hdr">
+          <div class="card-title" style="margin:0">Map View</div>
+          <div style="font-size:11px;color:#aaa" id="mapSubtitle"></div>
+        </div>
+      </div>
+      <div style="padding:0 16px 16px"><div id="map"></div></div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="section-hdr">
+          <div class="card-title" style="margin:0">By Building Use</div>
+          <span id="buildingTotal" style="font-size:11px;color:#aaa"></span>
+        </div>
+        <div id="buildingBars"></div>
+      </div>
+      <div class="card">
+        <div class="section-hdr">
+          <div class="card-title" style="margin:0">By Project Type</div>
+          <span id="projTypeTotal" style="font-size:11px;color:#aaa"></span>
+        </div>
+        <div id="projTypeBars"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-hdr">
+        <div class="card-title" style="margin:0">ZIP Code Breakdown</div>
+        <button class="btn-sm" onclick="exportCSV()">Export CSV</button>
+      </div>
+      <div class="scroll">
+        <table class="tbl">
+          <thead><tr><th>ZIP</th><th>City</th><th>Distance (mi)</th><th>Projects</th></tr></thead>
+          <tbody id="zipTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ZIP Coordinates (all WA ZIPs in dataset + common search centers) ─────────
+const COORDS = {
+  "98001":[47.320,-122.284],"98002":[47.308,-122.228],"98003":[47.307,-122.328],
+  "98004":[47.615,-122.202],"98005":[47.596,-122.173],"98006":[47.560,-122.148],
+  "98007":[47.602,-122.138],"98008":[47.602,-122.125],"98010":[47.329,-122.010],
+  "98011":[47.759,-122.210],"98012":[47.860,-122.210],"98014":[47.701,-121.917],
+  "98019":[47.718,-121.751],"98020":[47.803,-122.375],"98021":[47.809,-122.210],
+  "98022":[47.200,-121.986],"98023":[47.307,-122.373],"98024":[47.588,-121.884],
+  "98025":[47.432,-121.917],"98026":[47.803,-122.326],"98027":[47.531,-122.048],
+  "98028":[47.759,-122.243],"98029":[47.560,-122.013],"98030":[47.364,-122.172],
+  "98031":[47.381,-122.195],"98032":[47.381,-122.228],"98033":[47.677,-122.185],
+  "98034":[47.709,-122.210],"98035":[47.381,-122.195],"98036":[47.829,-122.315],
+  "98037":[47.822,-122.285],"98038":[47.432,-122.048],"98039":[47.631,-122.243],
+  "98040":[47.556,-122.243],"98041":[47.759,-122.210],"98042":[47.370,-122.148],
+  "98043":[47.803,-122.326],"98045":[47.487,-121.751],"98047":[47.314,-122.228],
+  "98050":[47.530,-121.917],"98051":[47.432,-121.917],"98052":[47.674,-122.125],
+  "98053":[47.644,-122.013],"98055":[47.464,-122.195],"98056":[47.496,-122.192],
+  "98057":[47.473,-122.217],"98058":[47.432,-122.127],"98059":[47.507,-122.148],
+  "98065":[47.530,-121.817],"98068":[47.412,-121.215],"98070":[47.404,-122.440],
+  "98071":[47.381,-122.195],"98072":[47.754,-122.148],"98073":[47.709,-122.210],
+  "98074":[47.626,-122.037],"98075":[47.588,-122.037],"98077":[47.759,-122.110],
+  "98082":[47.860,-122.210],"98083":[47.709,-122.210],"98087":[47.860,-122.282],
+  "98089":[47.381,-122.195],"98092":[47.293,-122.170],"98093":[47.381,-122.195],
+  "98101":[47.606,-122.332],"98102":[47.623,-122.320],"98103":[47.660,-122.343],
+  "98104":[47.602,-122.327],"98105":[47.662,-122.300],"98106":[47.537,-122.358],
+  "98107":[47.669,-122.384],"98108":[47.537,-122.308],"98109":[47.638,-122.347],
+  "98110":[47.623,-122.512],"98112":[47.631,-122.291],"98115":[47.686,-122.285],
+  "98116":[47.572,-122.390],"98117":[47.680,-122.370],"98118":[47.549,-122.279],
+  "98119":[47.637,-122.368],"98121":[47.614,-122.347],"98122":[47.610,-122.305],
+  "98125":[47.717,-122.296],"98126":[47.560,-122.370],"98133":[47.734,-122.333],
+  "98134":[47.578,-122.337],"98136":[47.545,-122.383],"98139":[47.648,-122.395],
+  "98144":[47.590,-122.296],"98146":[47.497,-122.357],"98148":[47.432,-122.318],
+  "98155":[47.757,-122.315],"98166":[47.456,-122.346],"98168":[47.495,-122.308],
+  "98177":[47.760,-122.370],"98178":[47.497,-122.243],"98188":[47.446,-122.285],
+  "98195":[47.654,-122.305],"98199":[47.650,-122.400],
+  "98201":[47.978,-122.202],"98203":[47.929,-122.243],"98204":[47.888,-122.238],
+  "98208":[47.903,-122.202],"98220":[48.496,-122.483],"98221":[48.503,-122.613],
+  "98223":[48.159,-122.125],"98225":[48.752,-122.479],"98226":[48.768,-122.502],
+  "98229":[48.702,-122.479],"98230":[48.990,-122.717],"98233":[48.519,-122.327],
+  "98236":[47.962,-122.418],"98239":[48.180,-122.673],"98240":[48.919,-122.605],
+  "98243":[48.611,-122.830],"98245":[48.621,-122.757],"98247":[48.931,-122.437],
+  "98248":[48.876,-122.571],"98249":[48.003,-122.555],"98250":[48.532,-123.024],
+  "98252":[48.082,-122.030],"98255":[48.427,-122.153],"98257":[48.404,-122.476],
+  "98258":[48.003,-122.076],"98260":[47.963,-122.358],"98261":[48.473,-122.883],
+  "98262":[48.718,-122.715],"98264":[48.876,-122.437],"98266":[48.695,-122.178],
+  "98270":[48.071,-122.176],"98271":[48.055,-122.107],"98272":[47.856,-121.966],
+  "98273":[48.424,-122.338],"98274":[48.424,-122.260],"98275":[47.914,-122.315],
+  "98276":[48.928,-122.330],"98277":[48.296,-122.657],"98279":[48.644,-122.899],
+  "98280":[48.482,-122.827],"98281":[48.984,-123.063],"98282":[48.213,-122.573],
+  "98284":[48.505,-122.228],"98286":[48.570,-123.004],"98290":[47.886,-122.030],
+  "98292":[48.158,-122.264],"98294":[47.840,-121.853],"98295":[48.990,-122.218],
+  "98296":[47.851,-122.118],"98297":[48.596,-123.003],
+  "98303":[47.207,-122.535],"98304":[46.754,-122.014],"98305":[48.055,-124.366],
+  "98310":[47.578,-122.623],"98311":[47.614,-122.650],"98312":[47.539,-122.638],
+  "98315":[47.727,-122.696],"98320":[47.710,-122.882],"98321":[47.155,-122.037],
+  "98322":[47.297,-122.081],"98323":[46.976,-122.014],"98325":[47.848,-122.730],
+  "98326":[48.186,-124.289],"98328":[46.909,-122.081],"98329":[47.388,-122.658],
+  "98330":[46.837,-122.014],"98331":[47.954,-124.389],"98332":[47.333,-122.578],
+  "98333":[47.280,-122.626],"98335":[47.294,-122.608],"98336":[46.554,-122.124],
+  "98337":[47.567,-122.623],"98338":[47.108,-122.267],"98340":[47.730,-122.553],
+  "98342":[47.750,-122.513],"98345":[47.654,-122.638],"98346":[47.798,-122.524],
+  "98349":[47.280,-122.704],"98351":[47.218,-122.512],"98353":[47.539,-122.512],
+  "98354":[47.246,-122.312],"98356":[46.554,-122.278],"98358":[48.038,-122.822],
+  "98360":[47.100,-122.014],"98362":[48.103,-123.431],"98363":[48.118,-123.431],
+  "98364":[47.854,-122.402],"98365":[47.963,-122.730],"98366":[47.510,-122.512],
+  "98367":[47.440,-122.658],"98368":[48.103,-122.822],"98370":[47.738,-122.650],
+  "98371":[47.186,-122.293],"98372":[47.208,-122.250],"98373":[47.145,-122.312],
+  "98374":[47.145,-122.181],"98375":[47.108,-122.312],"98376":[47.832,-122.822],
+  "98380":[47.541,-122.822],"98382":[48.130,-123.143],"98383":[47.649,-122.696],
+  "98387":[47.100,-122.433],"98388":[47.091,-122.433],"98390":[47.186,-122.152],
+  "98391":[47.188,-122.037],"98392":[47.700,-122.588],"98394":[47.245,-122.704],
+  "98395":[47.339,-122.704],"98396":[47.117,-122.010],"98402":[47.253,-122.444],
+  "98404":[47.215,-122.409],"98405":[47.253,-122.433],"98406":[47.271,-122.480],
+  "98407":[47.282,-122.512],"98409":[47.215,-122.473],"98418":[47.226,-122.444],
+  "98421":[47.258,-122.409],"98422":[47.282,-122.380],"98424":[47.237,-122.366],
+  "98433":[47.117,-122.555],"98438":[47.109,-122.567],"98439":[47.073,-122.480],
+  "98443":[47.226,-122.338],"98444":[47.145,-122.444],"98445":[47.145,-122.394],
+  "98446":[47.155,-122.394],"98465":[47.253,-122.480],"98466":[47.253,-122.512],
+  "98467":[47.226,-122.512],"98492":[47.207,-122.555],"98493":[47.151,-122.555],
+  "98496":[47.181,-122.512],"98498":[47.155,-122.502],"98499":[47.172,-122.487],
+  "98501":[47.038,-122.901],"98503":[47.022,-122.764],"98520":[46.975,-123.816],
+  "98531":[46.717,-122.954],"98532":[46.667,-122.954],"98537":[46.956,-123.762],
+  "98541":[47.045,-123.620],"98546":[47.338,-122.857],"98548":[47.440,-123.100],
+  "98550":[46.975,-123.935],"98557":[46.954,-123.273],"98560":[47.191,-123.456],
+  "98563":[47.191,-123.700],"98568":[46.866,-123.100],"98570":[46.554,-122.620],
+  "98572":[46.441,-123.456],"98575":[47.538,-123.938],"98579":[46.792,-123.024],
+  "98580":[46.866,-122.478],"98581":[46.319,-122.917],"98582":[46.554,-122.478],
+  "98583":[46.900,-123.456],"98584":[47.245,-123.100],"98586":[46.654,-123.622],
+  "98589":[46.793,-122.812],"98591":[46.319,-122.620],"98593":[46.554,-122.812],
+  "98597":[46.867,-122.267],"98602":[45.822,-121.557],"98604":[45.748,-122.395],
+  "98606":[45.748,-122.395],"98607":[45.615,-122.395],"98610":[45.715,-121.999],
+  "98611":[46.319,-122.820],"98612":[46.222,-123.456],"98613":[45.748,-120.819],
+  "98614":[46.222,-124.042],"98616":[45.966,-121.999],"98617":[45.700,-121.115],
+  "98619":[45.966,-121.557],"98620":[45.822,-120.819],"98621":[46.222,-123.100],
+  "98622":[45.748,-122.053],"98623":[45.748,-121.557],"98624":[46.308,-124.042],
+  "98625":[46.007,-122.820],"98626":[46.136,-122.820],"98628":[45.966,-120.819],
+  "98629":[45.748,-122.395],"98630":[46.319,-123.456],"98631":[46.366,-124.042],
+  "98632":[46.136,-122.938],"98635":[45.748,-121.115],"98638":[46.366,-123.820],
+  "98639":[45.748,-122.161],"98640":[46.519,-124.042],"98641":[46.590,-124.042],
+  "98642":[45.815,-122.740],"98643":[46.319,-123.700],"98644":[46.519,-123.938],
+  "98645":[46.319,-122.466],"98647":[46.222,-123.222],"98648":[45.748,-122.053],
+  "98649":[46.222,-122.938],"98650":[45.748,-121.557],"98651":[45.748,-121.441],
+  "98660":[45.628,-122.657],"98661":[45.639,-122.623],"98662":[45.648,-122.502],
+  "98663":[45.657,-122.657],"98664":[45.628,-122.563],"98665":[45.666,-122.657],
+  "98668":[45.628,-122.657],"98670":[45.822,-121.115],"98671":[45.615,-122.161],
+  "98672":[45.748,-121.215],"98673":[45.748,-120.819],"98674":[45.966,-122.820],
+  "98675":[45.848,-122.395],"98682":[45.655,-122.473],"98683":[45.613,-122.502],
+  "98684":[45.628,-122.473],"98685":[45.693,-122.657],"98686":[45.693,-122.563],
+  "98801":[47.424,-120.310],"98802":[47.424,-120.287],"98811":[47.838,-120.191],
+  "98812":[48.096,-119.779],"98813":[47.720,-119.912],"98814":[48.310,-120.191],
+  "98815":[47.560,-120.456],"98816":[47.838,-120.072],"98817":[47.720,-120.072],
+  "98819":[48.522,-119.301],"98821":[47.487,-120.456],"98822":[47.838,-120.310],
+  "98823":[47.324,-119.546],"98824":[47.063,-119.912],"98826":[47.604,-120.672],
+  "98827":[48.734,-119.657],"98828":[47.356,-120.191],"98829":[47.930,-119.657],
+  "98830":[47.489,-119.657],"98831":[47.838,-120.191],"98832":[47.320,-119.168],
+  "98833":[48.734,-120.672],"98834":[48.096,-120.191],"98836":[47.487,-120.310],
+  "98837":[47.130,-119.280],"98840":[48.096,-119.912],"98841":[48.412,-119.523],
+  "98843":[47.720,-119.779],"98844":[48.734,-119.301],"98845":[47.443,-119.912],
+  "98846":[48.310,-119.657],"98847":[47.412,-120.580],"98848":[47.191,-119.779],
+  "98849":[48.522,-119.546],"98850":[47.424,-120.191],"98851":[47.720,-119.301],
+  "98852":[47.930,-120.456],"98853":[47.191,-119.301],"98855":[48.522,-119.168],
+  "98856":[47.930,-120.191],"98857":[47.063,-119.546],"98858":[47.606,-119.779],
+  "98859":[48.734,-118.946],"98860":[47.320,-119.301],"98862":[48.522,-120.072],
+  "98901":[46.600,-120.549],"98902":[46.600,-120.505],"98903":[46.573,-120.617],
+  "98908":[46.617,-120.617],"98926":[46.997,-120.548],"98930":[46.250,-119.912],
+  "98932":[46.319,-120.456],"98933":[46.497,-120.819],"98934":[46.941,-120.991],
+  "98935":[46.222,-120.310],"98936":[46.617,-120.819],"98937":[46.900,-121.115],
+  "98938":[46.441,-120.310],"98939":[46.573,-120.617],"98940":[47.324,-120.817],
+  "98941":[47.191,-120.817],"98942":[46.654,-120.529],"98943":[47.063,-120.817],
+  "98944":[46.324,-119.912],"98946":[47.191,-120.580],"98947":[46.741,-120.817],
+  "98948":[46.375,-120.310],"98950":[47.191,-120.310],"98951":[46.441,-120.456],
+  "98952":[46.741,-121.115],"98953":[46.573,-120.456],
+  "99001":[47.780,-117.614],"99003":[47.930,-117.279],"99004":[47.597,-117.614],
+  "99005":[47.930,-117.440],"99006":[47.930,-117.614],"99008":[47.597,-118.029],
+  "99009":[47.930,-117.279],"99011":[47.630,-117.614],"99012":[47.597,-117.279],
+  "99013":[47.780,-117.947],"99014":[47.630,-117.440],"99016":[47.630,-117.279],
+  "99017":[47.412,-117.614],"99018":[47.412,-117.279],"99019":[47.630,-117.115],
+  "99020":[47.597,-117.440],"99021":[47.780,-117.440],"99022":[47.597,-117.779],
+  "99023":[47.412,-117.115],"99025":[47.780,-117.115],"99026":[47.780,-117.614],
+  "99027":[47.780,-117.115],"99029":[47.930,-118.183],"99030":[47.412,-117.115],
+  "99031":[47.412,-117.440],"99032":[47.412,-118.183],"99033":[47.412,-117.115],
+  "99034":[47.780,-117.947],"99036":[47.412,-117.279],"99037":[47.630,-117.115],
+  "99039":[47.412,-117.279],"99040":[47.780,-118.183],"99101":[48.310,-118.457],
+  "99102":[47.412,-117.115],"99103":[47.930,-119.168],"99104":[47.412,-117.115],
+  "99105":[46.941,-118.457],"99107":[48.734,-118.457],"99109":[47.930,-118.183],
+  "99110":[47.780,-117.614],"99111":[46.941,-117.614],"99113":[46.741,-117.440],
+  "99114":[48.540,-117.902],"99115":[47.720,-119.546],"99116":[47.930,-118.696],
+  "99117":[47.597,-118.457],"99118":[48.522,-118.696],"99119":[48.340,-117.134],
+  "99121":[48.734,-118.183],"99122":[47.412,-118.696],"99123":[47.720,-119.301],
+  "99124":[47.930,-118.946],"99125":[46.741,-117.779],"99126":[48.310,-118.183],
+  "99128":[47.063,-117.279],"99129":[47.930,-118.457],"99130":[47.412,-117.440],
+  "99131":[47.930,-118.183],"99133":[47.930,-119.546],"99134":[47.597,-118.696],
+  "99135":[47.720,-118.946],"99136":[46.741,-118.183],"99137":[47.780,-118.457],
+  "99138":[47.930,-118.696],"99139":[48.734,-117.614],"99140":[47.780,-118.696],
+  "99141":[48.522,-118.183],"99143":[46.741,-118.457],"99144":[47.412,-118.946],
+  "99146":[48.734,-118.457],"99147":[47.597,-118.946],"99148":[47.930,-117.614],
+  "99149":[47.412,-117.779],"99150":[48.310,-118.696],"99151":[47.930,-118.183],
+  "99152":[48.734,-117.440],"99153":[48.310,-117.440],"99154":[47.597,-118.696],
+  "99155":[47.930,-119.546],"99156":[47.930,-117.440],"99157":[48.734,-117.279],
+  "99158":[47.063,-117.779],"99159":[47.412,-119.168],"99160":[48.734,-118.946],
+  "99161":[46.741,-117.279],"99163":[46.741,-117.115],"99164":[46.741,-117.115],
+  "99166":[48.522,-118.946],"99167":[47.930,-118.183],"99169":[47.063,-119.301],
+  "99170":[47.063,-117.440],"99171":[47.412,-117.614],"99173":[47.780,-118.183],
+  "99174":[46.941,-117.779],"99176":[47.063,-117.614],"99179":[46.522,-117.279],
+  "99180":[47.930,-117.279],"99181":[47.930,-117.614],"99185":[47.930,-119.168],
+  "99201":[47.668,-117.440],"99202":[47.651,-117.388],"99203":[47.630,-117.388],
+  "99204":[47.651,-117.440],"99205":[47.668,-117.440],"99206":[47.630,-117.279],
+  "99207":[47.685,-117.388],"99208":[47.718,-117.440],"99209":[47.668,-117.440],
+  "99210":[47.668,-117.440],"99212":[47.651,-117.279],"99213":[47.651,-117.183],
+  "99214":[47.651,-117.279],"99215":[47.651,-117.279],"99216":[47.651,-117.115],
+  "99217":[47.718,-117.279],"99218":[47.744,-117.409],"99219":[47.668,-117.614],
+  "99220":[47.668,-117.440],"99223":[47.613,-117.388],"99224":[47.651,-117.614],
+  "99228":[47.718,-117.440],"99251":[47.668,-117.440],"99252":[47.668,-117.440],
+  "99256":[47.668,-117.440],"99258":[47.668,-117.440],"99260":[47.668,-117.440],
+  "99301":[46.230,-119.100],"99302":[46.230,-119.100],"99320":[46.007,-119.301],
+  "99321":[46.941,-119.912],"99322":[45.748,-120.580],"99323":[46.007,-118.694],
+  "99324":[46.319,-118.183],"99326":[46.319,-119.168],"99328":[46.441,-117.947],
+  "99329":[46.222,-118.183],"99330":[46.230,-119.168],"99333":[46.741,-118.946],
+  "99335":[46.647,-119.168],"99336":[46.203,-119.168],"99337":[46.222,-119.301],
+  "99338":[46.203,-119.301],"99341":[46.941,-119.546],"99343":[46.319,-119.546],
+  "99344":[46.941,-119.301],"99345":[45.930,-119.301],"99346":[45.748,-119.546],
+  "99347":[46.441,-117.614],"99348":[46.441,-118.183],"99349":[46.630,-119.912],
+  "99350":[46.222,-119.546],"99352":[46.266,-119.280],"99353":[46.222,-119.168],
+  "99354":[46.266,-119.168],"99356":[45.748,-120.310],"99357":[46.863,-119.912],
+  "99359":[46.319,-118.457],"99360":[46.007,-118.457],"99361":[46.319,-118.183],
+  "99362":[46.065,-118.343],"99363":[46.007,-118.946],"99371":[46.630,-118.457]
+};
+
+// ── Project data ─────────────────────────────────────────────────────────────
+const RAW = [
+  [531915,"Joint Base Lewis Mcchord","98433","Renovation/Remodel/Repair","Military"],
+  [531940,"Cosmopolis","98537","Renovation/Remodel/Repair","Education/School/University"],
+  [531996,"Bellevue","98007","Addition","Education/School/University"],
+  [532050,"Seattle","98118","Renovation/Remodel/Repair","Education/School/University"],
+  [532164,"Kahlotus","99335","Renovation/Remodel/Repair","Education/School/University"],
+  [532221,"Seattle","98122","New Construction with Site Work","Multi-Residential"],
+  [532247,"Seattle","98118","Renovation/Remodel/Repair","Education/School/University"],
+  [532251,"Renton","98056","Renovation/Remodel/Repair","Education/School/University"],
+  [532255,"Renton","98057","Renovation/Remodel/Repair","Community Center"],
+  [532391,"Vancouver","98664","Renovation/Remodel/Repair","Municipal"],
+  [532471,"Bremerton","98337","Renovation/Remodel/Repair","Education/School/University"],
+  [532582,"Tacoma","98421","Renovation/Remodel/Repair","Municipal"],
+  [532649,"Ellensburg","98926","Renovation/Remodel/Repair","Municipal"],
+  [532685,"Silverdale","98383","New Construction with Site Work","Retail Store"],
+  [532715,"Bellingham","98225","Renovation/Remodel/Repair","Municipal"],
+  [532750,"Brewster","98812","Renovation/Remodel/Repair","Education/School/University"],
+  [532752,"Vancouver","98661","Renovation/Remodel/Repair","Municipal"],
+  [532845,"Spokane","99205","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care"],
+  [532854,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University"],
+  [532864,"Bellingham","98225","Tenant Build-Out","Restaurant"],
+  [532897,"Bellingham","98225","Renovation/Remodel/Repair","Municipal"],
+  [533023,"Lakewood","98499","Renovation/Remodel/Repair","Grocery Store"],
+  [533035,"Shoreline","98155","New Construction with Site Work","Multi-Residential"],
+  [533094,"Spokane","99205","Renovation/Remodel/Repair","Other"],
+  [533095,"Bellevue","98006","Renovation/Remodel/Repair","Education/School/University"],
+  [533108,"Ellensburg","98926","Site Work Only","Municipal"],
+  [533168,"Federal Way","98003","Renovation/Remodel/Repair","Municipal"],
+  [533174,"Bellevue","98006","Renovation/Remodel/Repair","Education/School/University"],
+  [533178,"Centralia","98531","Renovation/Remodel/Repair","Municipal"],
+  [533191,"Silverdale","98383","Tenant Build-Out","Retail Store"],
+  [533313,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University"],
+  [533415,"Vancouver","98660","Renovation/Remodel/Repair","Library"],
+  [533432,"Federal Way","98003","Renovation/Remodel/Repair","Multi-Residential"],
+  [533556,"Gig Harbor","98332","Renovation/Remodel/Repair","Jail/Prison"],
+  [533614,"Lake Stevens","98258","New Construction with Site Work","Retail Store"],
+  [533638,"Lopez Island","98261","New Construction with Site Work","Park/Playground"],
+  [533671,"Palisades","98845","Renovation/Remodel/Repair","Education/School/University"],
+  [533680,"Cusick","99119","Renovation/Remodel/Repair","Education/School/University"],
+  [533864,"Silverdale","98383","Tenant Build-Out","Retail Store"],
+  [534070,"Enumclaw","98022","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care"],
+  [534076,"Fife","98424","Renovation/Remodel/Repair","Fire/Police Station"],
+  [534081,"Goldendale","98620","Renovation/Remodel/Repair","Municipal"],
+  [534121,"Omak","98841","Renovation/Remodel/Repair","Municipal"],
+  [534144,"Kirkland","98033","Renovation/Remodel/Repair","Municipal"],
+  [534175,"Vancouver","98685","Renovation/Remodel/Repair","Municipal"],
+  [534197,"Centralia","98531","Addition","Municipal"],
+  [534198,"Seattle","98118","Renovation/Remodel/Repair","Education/School/University"],
+  [534218,"Bremerton","98311","Renovation/Remodel/Repair","Municipal"],
+  [534236,"Selah","98942","Addition","Education/School/University"],
+  [534276,"Port Angeles","98363","New Construction with Site Work","Municipal"],
+  [534291,"Spokane","99218","New Construction with Site Work","Retail Store"],
+  [534303,"Vancouver","98662","Renovation/Remodel/Repair","Other"],
+  [534331,"Seattle","98115","Renovation/Remodel/Repair","Education/School/University"],
+  [534367,"Pasco","99301","Renovation/Remodel/Repair","Education/School/University"],
+  [534418,"Bellevue","98004","Renovation/Remodel/Repair","Retail Store"],
+  [534430,"Everett","98208","Renovation/Remodel/Repair","Fitness Center"],
+  [534514,"Enumclaw","98022","Renovation/Remodel/Repair","Municipal"],
+  [534535,"Federal Way","98003","Renovation/Remodel/Repair","Multi-Residential"],
+  [534548,"Tacoma","98493","Renovation/Remodel/Repair","Clinic/Hospital/Medical"],
+  [534661,"Ridgefield","98642","New Construction with Site Work","Community Center"],
+  [534679,"Vancouver","98661","Renovation/Remodel/Repair","Municipal"],
+  [534683,"Vancouver","98685","Renovation/Remodel/Repair","Municipal"],
+  [534695,"Yakima","98902","Tenant Build-Out","Retail Store"],
+  [534711,"Spokane","99218","New Construction with Site Work","Retail Store"],
+  [534722,"Ridgefield","98642","New Construction with Site Work","Community Center"],
+  [534728,"Spanaway","98387","Renovation/Remodel/Repair","Waste Water Treatment"],
+  [534850,"Bellevue","98004","Renovation/Remodel/Repair","Retail Store"],
+  [534887,"Morton","98356","Renovation/Remodel/Repair","Fire/Police Station"],
+  [534918,"Tulalip","98271","Tenant Build-Out","Retail Store"],
+  [534938,"Tacoma","98493","Renovation/Remodel/Repair","Medical"],
+  [534950,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University"],
+  [534952,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University"],
+  [535021,"Vancouver","98660","Renovation/Remodel/Repair","Municipal"],
+  [535037,"Seattle","98112","Renovation/Remodel/Repair","Multi-Residential"],
+  [535053,"Bellevue","98004","Tenant Build-Out","Retail Store"],
+  [535062,"Walla Walla","99362","Renovation/Remodel/Repair","Jail/Prison"],
+  [535078,"Seattle","98115","Renovation/Remodel/Repair","Education/School/University"],
+  [535100,"Seattle","98107","Renovation/Remodel/Repair","Retail Store"],
+  [535102,"Renton","98057","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care"],
+  [535113,"Auburn","98002","Renovation/Remodel/Repair","Theater/Auditorium"],
+  [535144,"Tacoma","98421","Renovation/Remodel/Repair","Municipal"],
+  [535160,"Tulalip","98271","Renovation/Remodel/Repair","Retail Store"],
+  [535190,"Gig Harbor","98332","Renovation/Remodel/Repair","Mixed-Use"],
+  [535276,"Olympia","98501","Renovation/Remodel/Repair","Education/School/University"],
+  [535382,"Spokane","99218","New Construction with Site Work","Retail Store"],
+  [535421,"Sunnyside","98944","Renovation/Remodel/Repair","Municipal"],
+  [535460,"Seattle","98107","Renovation/Remodel/Repair","Retail Store"],
+  [535528,"Vancouver","98662","Tenant Build-Out","Mixed-Use"],
+  [535562,"Kent","98032","Renovation/Remodel/Repair","Residential Subdivision"],
+  [535739,"Vancouver","98662","Renovation/Remodel/Repair","Mixed-Use"],
+  [535841,"Grays Harbor City","98550","New Construction with Site Work","Convenience Store/Gas Station"],
+  [535874,"Seattle","98178","Renovation/Remodel/Repair","Education/School/University"],
+  [535892,"Auburn","98092","New Construction with Site Work","Municipal"],
+  [536000,"Renton","98056","Renovation/Remodel/Repair","Education/School/University"],
+  [536058,"Bellingham","98225","Renovation/Remodel/Repair","Waste Water Treatment"],
+  [536079,"Vancouver","98682","Renovation/Remodel/Repair","Education/School/University"],
+  [536232,"Wenatchee","98801","Renovation/Remodel/Repair","Mixed-Use"],
+  [536297,"Tulalip","98271","Renovation/Remodel/Repair","Retail Store"],
+  [536438,"Bellingham","98225","Renovation/Remodel/Repair","Waste Water Treatment"],
+  [536552,"Seattle","98118","Renovation/Remodel/Repair","Education/School/University"],
+  [536562,"Toppenish","98948","Renovation/Remodel/Repair","Waste Water Treatment"],
+  [536649,"Sammamish","98074","Renovation/Remodel/Repair","Fitness Center"],
+  [536770,"Renton","98057","Tenant Build-Out","Other"],
+  [536777,"Woodinville","98072","Tenant Build-Out","Other"],
+  [536819,"Enumclaw","98022","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care"],
+  [536825,"Bellevue","98005","New Construction with Site Work","Mixed-Use"],
+  [536836,"Enumclaw","98022","Renovation/Remodel/Repair","Other"],
+  [536852,"Tacoma","98409","Renovation/Remodel/Repair","Office"],
+  [536855,"Bellingham","98226","Renovation/Remodel/Repair","Municipal"],
+  [536873,"Port Angeles","98363","New Construction with Site Work","Municipal"],
+  [536899,"Seattle","98118","Renovation/Remodel/Repair","Education/School/University"],
+  [536987,"Moses Lake","98837","Renovation/Remodel/Repair","Office"],
+  [537086,"Enumclaw","98022","Renovation/Remodel/Repair","Other"],
+  [537087,"Enumclaw","98022","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care"],
+  [537089,"Bellingham","98225","Renovation/Remodel/Repair","Municipal"],
+  [537090,"Bremerton","98337","Renovation/Remodel/Repair","Education/School/University"],
+  [537113,"Kent","98042","New Construction no Site Work","Other"],
+  [537135,"Seattle","98109","Renovation/Remodel/Repair","Fitness Center"],
+  [537141,"Enumclaw","98022","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care"],
+  [537142,"Blaine","98230","Renovation/Remodel/Repair","Municipal"],
+  [537178,"Lakewood","98498","Renovation/Remodel/Repair","Municipal"],
+  [537273,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University"],
+  [537274,"Seattle","98105","Renovation/Remodel/Repair","Education/School/University"],
+  [537305,"Bonney Lake","98391","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care"],
+  [537338,"Seattle","98115","Renovation/Remodel/Repair","Education/School/University"],
+  [537408,"Seattle","98178","Renovation/Remodel/Repair","Education/School/University"],
+  [537450,"Poulsbo","98370","Renovation/Remodel/Repair","Municipal"],
+  [537452,"Bremerton","98337","Renovation/Remodel/Repair","Municipal"],
+  [537663,"Lynnwood","98037","Renovation/Remodel/Repair","Education/School/University"],
+  [537675,"Grandview","98930","Renovation/Remodel/Repair","Municipal"],
+  [537727,"Ridgefield","98642","New Construction with Site Work","Municipal"],
+  [537899,"Tukwila","98188","Tenant Build-Out","Retail Store"],
+  [537908,"Lakewood","98499","Tenant Build-Out","Retail Store"],
+  [537968,"Vancouver","98683","Renovation/Remodel/Repair","Medical"],
+  [537978,"Vancouver","98660","Renovation/Remodel/Repair","Fire/Police Station"],
+  [537982,"Ilwaco","98624","Renovation/Remodel/Repair","Clinic/Hospital/Medical"],
+  [537999,"Tacoma","98493","Renovation/Remodel/Repair","Other"],
+  [538019,"Vancouver","98660","Renovation/Remodel/Repair","Municipal"],
+  [538034,"Chehalis","98532","New Construction with Site Work","Hotel/Motel"],
+  [538081,"Seattle","98112","Renovation/Remodel/Repair","Multi-Residential"],
+  [538092,"Bellingham","98229","Renovation/Remodel/Repair","Municipal"],
+  [538187,"Gig Harbor","98332","Renovation/Remodel/Repair","Mixed-Use"],
+  [538193,"Sammamish","98074","Renovation/Remodel/Repair","Medical"],
+  [538207,"Vancouver","98660","Renovation/Remodel/Repair","Municipal"],
+  [538253,"Port Angeles","98363","New Construction with Site Work","Municipal"],
+  [538254,"Bellingham","98229","Renovation/Remodel/Repair","Municipal"],
+  [538283,"Kirkland","98033","Renovation/Remodel/Repair","Municipal"],
+  [538326,"Beaver","98305","Renovation/Remodel/Repair","Municipal"],
+  [538330,"Everett","98203","Renovation/Remodel/Repair","Education/School/University"],
+  [538428,"Bellingham","98229","Renovation/Remodel/Repair","Municipal"],
+  [538436,"Bellevue","98005","Renovation/Remodel/Repair","Education/School/University"],
+  [538680,"Walla Walla","99362","Renovation/Remodel/Repair","Education/School/University"],
+  [538717,"Aberdeen","98520","Renovation/Remodel/Repair","Education/School/University"],
+  [538727,"Mount Vernon","98273","Renovation/Remodel/Repair","Clinic/Hospital/Medical"],
+  [538731,"East Wenatchee","98802","New Construction with Site Work","Waste Water Treatment"],
+  [538743,"Vancouver","98685","Renovation/Remodel/Repair","Waste Water Treatment"],
+  [538790,"Spokane","99218","Renovation/Remodel/Repair","Retail Store"],
+  [538796,"Bellingham","98225","Renovation/Remodel/Repair","Education/School/University"],
+  [538950,"Bellingham","98225","Renovation/Remodel/Repair","Education/School/University"],
+  [538959,"Redmond","98052","Renovation/Remodel/Repair","Retail Store"],
+  [538982,"Forks","98331","New Construction with Site Work","Residential Subdivision"],
+  [539038,"Bellevue","98004","Renovation/Remodel/Repair","Retail Store"],
+  [539182,"Lynnwood","98036","Renovation/Remodel/Repair","Mixed-Use"],
+  [539215,"Port Angeles","98363","New Construction with Site Work","Municipal"],
+  [539231,"Kennewick","99336","Renovation/Remodel/Repair","Municipal"],
+  [539236,"Bonney Lake","98391","Renovation/Remodel/Repair","Assisted Living Facility/Elder Care"],
+  [539247,"Seattle","98115","Renovation/Remodel/Repair","Private School"],
+  [539304,"Port Angeles","98363","New Construction with Site Work","Municipal"],
+  [539380,"Lynnwood","98037","Renovation/Remodel/Repair","Education/School/University"],
+  [539382,"Buckley","98321","New Construction with Site Work","Multi-Residential"],
+  [539434,"Newcastle","98059","Renovation/Remodel/Repair","Retail Store"],
+  [539457,"South Bend","98586","Renovation/Remodel/Repair","Education/School/University"],
+  [539461,"Rochester","98579","New Construction with Site Work","Auto Dealership"],
+  [539488,"Silverdale","98383","Renovation/Remodel/Repair","Retail Store"],
+  [539578,"Seattle","98107","Renovation/Remodel/Repair","Retail Store"],
+  [539615,"Moses Lake","98837","Renovation/Remodel/Repair","Retail Store"],
+  [539819,"Renton","98056","Renovation/Remodel/Repair","Education/School/University"],
+  [539956,"Friday Harbor","98250","Renovation/Remodel/Repair","Park/Playground"],
+  [539969,"Richland","99352","Renovation/Remodel/Repair","Retail Store"],
+  [540040,"Bellevue","98007","Renovation/Remodel/Repair","Multi-Residential"],
+  [540051,"Bellingham","98225","Renovation/Remodel/Repair","Education/School/University"],
+  [540147,"Kent","98032","Renovation/Remodel/Repair","Multi-Residential"],
+  [540164,"Sunnyside","98944","Renovation/Remodel/Repair","Retail Store"],
+  [540175,"Bellevue","98007","Renovation/Remodel/Repair","Multi-Residential"],
+  [540215,"Bellevue","98008","Renovation/Remodel/Repair","Multi-Residential"],
+  [540284,"Orting","98360","Renovation/Remodel/Repair","Residential Subdivision"],
+  [540383,"Sunnyside","98944","Tenant Build-Out","Retail Store"],
+  [540441,"Tacoma","98446","New Construction with Site Work","Restaurant"],
+  [540484,"Lacey","98503","Renovation/Remodel/Repair","Municipal"],
+  [540489,"Colville","99114","Renovation/Remodel/Repair","Retail Store"],
+  [540552,"Federal Way","98003","Renovation/Remodel/Repair","Multi-Residential"],
+  [540569,"Freeland","98249","Renovation/Remodel/Repair","Retail Store"],
+  [540590,"Arlington","98223","Renovation/Remodel/Repair","Retail Store"],
+  [540599,"Lacey","98503","Renovation/Remodel/Repair","Municipal"],
+  [540742,"Tulalip","98271","Tenant Build-Out","Retail Store"],
+  [540764,"Tumwater","98501","Renovation/Remodel/Repair","Education/School/University"],
+  [540803,"Forks","98331","Renovation/Remodel/Repair","Jail/Prison"],
+  [540906,"Mukilteo","98275","Tenant Build-Out","Fitness Center"],
+  [541157,"Ridgefield","98642","New Construction with Site Work","Municipal"],
+  [541285,"Ephrata","98823","Renovation/Remodel/Repair","Retail Store"],
+  [541614,"Seattle","98195","Renovation/Remodel/Repair","Education/School/University"],
+  [541739,"Renton","98056","Renovation/Remodel/Repair","Private School"],
+  [541765,"Kennewick","99336","New Construction with Site Work","Service Station/Car Wash"],
+  [541767,"Tulalip","98271","Tenant Build-Out","Retail Store"]
+];
+
+// Build projectData
+const projectData = {};
+RAW.forEach(([id,city,zip,projType,useType]) => {
+  const z = String(zip).trim();
+  if(!projectData[z]) projectData[z]={count:0,city,useTypes:{},projTypes:{}};
+  projectData[z].count++;
+  if(useType) projectData[z].useTypes[useType]=(projectData[z].useTypes[useType]||0)+1;
+  if(projType) projectData[z].projTypes[projType]=(projectData[z].projTypes[projType]||0)+1;
+});
+document.getElementById('loadedSummary').textContent =
+  `${RAW.length} projects across ${Object.keys(projectData).length} ZIP codes`;
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function haversine(la1,lo1,la2,lo2){
+  const R=3958.8,d=Math.PI/180;
+  const a=Math.sin((la2-la1)*d/2)**2+Math.cos(la1*d)*Math.cos(la2*d)*Math.sin((lo2-lo1)*d/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.remove('hidden');}
+function hideErr(id){document.getElementById(id).classList.add('hidden');}
+
+let map=null, searchResults=[];
+
+function runSearch(){
+  hideErr('searchError');
+  const raw=document.getElementById('zipInput').value.trim().replace(/\D/g,'');
+  const zip=raw.length===4?'0'+raw:raw;
+  const radius=parseInt(document.getElementById('radiusInput').value);
+
+  if(raw.length<4||raw.length>5){showErr('searchError','Please enter a valid 5-digit ZIP code.');return;}
+
+  const center=COORDS[zip];
+  if(!center){showErr('searchError',`ZIP code ${zip} was not found. Please try a nearby ZIP code.`);return;}
+
+  const btn=document.getElementById('searchBtn');
+  btn.disabled=true;btn.textContent='Searching…';
+
+  searchResults=[];
+  Object.entries(projectData).forEach(([z,data])=>{
+    const c=COORDS[z];
+    if(!c) return;
+    const dist=haversine(center[0],center[1],c[0],c[1]);
+    if(dist<=radius) searchResults.push({zip:z,dist:Math.round(dist*10)/10,data,coords:c});
+  });
+  searchResults.sort((a,b)=>a.dist-b.dist);
+
+  const total=searchResults.reduce((s,r)=>s+r.data.count,0);
+  const avg=searchResults.length?Math.round(total/searchResults.length):0;
+
+  document.getElementById('statTotal').textContent=total.toLocaleString();
+  document.getElementById('statRadius').textContent=`within ${radius} mi of ${zip}`;
+  document.getElementById('statZips').textContent=searchResults.length;
+  document.getElementById('statAvg').textContent=avg;
+  document.getElementById('mapSubtitle').textContent=`${radius}-mile radius from ZIP ${zip}`;
+  document.getElementById('resultsSection').classList.remove('hidden');
+
+  const useAgg={},ptAgg={};
+  searchResults.forEach(r=>{
+    Object.entries(r.data.useTypes).forEach(([k,v])=>{useAgg[k]=(useAgg[k]||0)+v;});
+    Object.entries(r.data.projTypes).forEach(([k,v])=>{ptAgg[k]=(ptAgg[k]||0)+v;});
+  });
+  renderBars('buildingBars',useAgg,10,'buildingTotal');
+  renderBars('projTypeBars',ptAgg,10,'projTypeTotal');
+
+  const tbody=document.getElementById('zipTableBody');
+  tbody.innerHTML='';
+  if(!searchResults.length){
+    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;padding:30px;color:#bbb">No results in this radius.</td></tr>';
+  } else {
+    searchResults.forEach(r=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td><span class="badge">${r.zip}</span></td><td style="color:#666">${r.data.city}</td><td>${r.dist}</td><td>${r.data.count}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Build map
+  if(map){map.remove();map=null;}
+  map=L.map('map');
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom:18
+  }).addTo(map);
+
+  const circle=L.circle(center,{
+    radius:radius*1609.34,color:'#1a1a1a',weight:1.5,
+    fillColor:'#1a1a1a',fillOpacity:0.04,dashArray:'6 4'
+  }).addTo(map);
+
+  L.marker(center,{icon:L.divIcon({className:'',
+    html:`<div style="width:14px;height:14px;background:#1a1a1a;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>`,
+    iconAnchor:[7,7]})})
+    .addTo(map).bindPopup(`<b>Center: ${zip}</b>`);
+
+  if(searchResults.length){
+    const mx=Math.max(...searchResults.map(r=>r.data.count),1);
+    searchResults.forEach(r=>{
+      const pct=r.data.count/mx;
+      const sz=Math.max(10,Math.round(10+pct*18));
+      const op=(0.55+pct*0.4).toFixed(2);
+      const ic=L.divIcon({className:'',
+        html:`<div style="width:${sz}px;height:${sz}px;background:rgba(46,125,50,${op});border:2px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.3)"></div>`,
+        iconAnchor:[Math.round(sz/2),Math.round(sz/2)]});
+      const topUse=Object.entries(r.data.useTypes).sort((a,b)=>b[1]-a[1])[0];
+      L.marker(r.coords,{icon:ic}).addTo(map)
+        .bindPopup(`<b>${r.zip}</b> · ${r.data.city}<br>${r.data.count} project${r.data.count!==1?'s':''} · ${r.dist} mi${topUse?'<br>Top use: '+topUse[0]:''}`);
+    });
+  }
+
+  map.fitBounds(circle.getBounds(),{padding:[30,30]});
+  btn.disabled=false;btn.textContent='Search';
+}
+
+function renderBars(id,agg,topN,totalId){
+  const el=document.getElementById(id);
+  const sorted=Object.entries(agg).sort((a,b)=>b[1]-a[1]).slice(0,topN);
+  const max=sorted.length?sorted[0][1]:1;
+  const grand=Object.values(agg).reduce((s,v)=>s+v,0);
+  document.getElementById(totalId).textContent=grand+' total';
+  if(!sorted.length){el.innerHTML='<div style="font-size:13px;color:#aaa;padding:8px 0">No data</div>';return;}
+  el.innerHTML=sorted.map(([k,v])=>`
+    <div class="bar-wrap">
+      <div class="bar-label" title="${k}">${k}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/max*100)}%"></div></div>
+      <div class="bar-count">${v}</div>
+    </div>`).join('');
+}
+
+function exportCSV(){
+  if(!searchResults.length) return;
+  const zip=document.getElementById('zipInput').value.trim();
+  const radius=document.getElementById('radiusInput').value;
+  let csv='ZIP Code,City,Distance (mi),Projects\n';
+  searchResults.forEach(r=>{csv+=`${r.zip},"${r.data.city}",${r.dist},${r.data.count}\n`;});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download=`projects_${zip}_${radius}mi.csv`;a.click();
+}
+
+document.getElementById('zipInput').addEventListener('keydown',e=>{if(e.key==='Enter')runSearch();});
+</script>
+</body>
+</html>
