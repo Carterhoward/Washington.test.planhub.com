@@ -128,7 +128,7 @@ input:focus{border-color:#1a2332}
 <body>
 
 <div class="header">
-  <img src="https://www.planhub.com/wp-content/uploads/2022/08/PlanHub-Logo.png" alt="PlanHub" style="height:34px;filter:brightness(0) invert(1);object-fit:contain;" onerror="this.style.display='none'">
+  <img src="https://www.planhub.com/wp-content/uploads/2022/08/PlanHub-Logo.png" alt="PlanHub" style="height:34px;filter:brightness(0) invert(1);object-fit:contain;">
   <div class="header-divider"></div>
   <div>
     <div class="header-title">Washington Pricing Tool</div>
@@ -684,21 +684,6 @@ function runSearch(){
   document.getElementById('savingsProjects').textContent=target;
   document.getElementById('savingsAmount').textContent=fmtRate(rate);
   document.getElementById('savingsVsBase').textContent=savingsPerProject>0?fmt(savingsPerProject)+'/project':'at base rate';
-
-  // Tier rows
-  var rows='';
-  TIERS.forEach(function(t,i){
-    var tCPP=(t.price/((t.min+Math.min(t.max,t.min+49))/2)).toFixed(2);
-    var disc=i===0?'—':Math.round((1-(t.price/TIERS[0].price))*100)+'% off';
-    var isActive=(target>=t.min&&target<=t.max);
-    rows+='<div class="pricing-tier-row'+(isActive?' active-tier':'')+'">'+
-      '<span style="font-weight:'+(isActive?'700':'400')+'">'+t.label+(isActive?' <span class="tier-badge">YOUR TIER</span>':'')+'</span>'+
-      '<span class="tier-price">'+fmt(t.price)+'</span>'+
-      '<span class="tier-cpp">~$'+tCPP+'</span>'+
-      '<span style="color:'+(i===0?'#999':'#2e7d32')+'">'+disc+'</span>'+
-      '</div>';
-  });
-  document.getElementById('tierRows').innerHTML=rows;
 
   // Stats
   document.getElementById('statActive').textContent=activeCount.toLocaleString();
