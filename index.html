@@ -109,6 +109,19 @@ input[type=text]:focus,select:focus{border-color:#555}
     </div>
     <div class="two-col">
       <div class="card">
+        <div class="section-hdr"><div class="card-title" style="margin:0;color:#2e7d32">Active Projects</div><span id="activeTotal" style="font-size:11px;color:#aaa"></span></div>
+        <div style="font-size:42px;font-weight:700;color:#2e7d32;margin:8px 0 4px" id="activeCount">—</div>
+        <div style="font-size:12px;color:#888">Bid due date is today or in the future</div>
+      </div>
+      <div class="card">
+        <div class="section-hdr"><div class="card-title" style="margin:0;color:#c0392b">Past Bid Date</div><span id="closedTotal" style="font-size:11px;color:#aaa"></span></div>
+        <div style="font-size:42px;font-weight:700;color:#c0392b;margin:8px 0 4px" id="closedCount">—</div>
+        <div style="font-size:12px;color:#888">Bid due date has already passed</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
         <div class="section-hdr"><div class="card-title" style="margin:0">By Building Use</div><span id="buildingTotal" style="font-size:11px;color:#aaa"></span></div>
         <div id="buildingBars"></div>
       </div>
@@ -474,6 +487,10 @@ function runSearch(){
   document.getElementById('statAvg').textContent=avg;
   document.getElementById('statActive').textContent=active.toLocaleString();
   document.getElementById('statClosed').textContent=closed.toLocaleString();
+  document.getElementById('activeCount').textContent=active.toLocaleString();
+  document.getElementById('activeTotal').textContent='of '+total+' total';
+  document.getElementById('closedCount').textContent=closed.toLocaleString();
+  document.getElementById('closedTotal').textContent='of '+total+' total';
   document.getElementById('mapSubtitle').textContent=radius+'-mile radius from ZIP '+zip;
   document.getElementById('resultsSection').classList.remove('hidden');
 
